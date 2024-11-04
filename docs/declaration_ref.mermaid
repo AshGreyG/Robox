@@ -1,0 +1,67 @@
+---
+title: Robox Class Diagram
+---
+
+classDiagram
+    class Input["Core::Input"] {
+        + seq_ : queue~int~
+    }
+    class Output["Core::Output"] {
+        + seq_ : queue~int~
+    }
+    class Vacant["Core::Vacant"] {
+        + seq_ : queue~int~
+    }
+    class Robot["Core::Robot"] {
+        - handbox_ : int
+        - cmd_ : Command
+        - handbox_state_ : bool
+        $+ kEmptyHandbox : int
+        + Robot(in, out, hs) : [[constructor]]
+        + getValue() : int
+        + setValue(v) : void
+        + isEmpty() : bool
+        + setState(s) : void
+        + initCommandList(name, index) : void
+    }
+    class Command["Core::Command"] {
+        $- kCmdCount : unsigned int
+        - list_ : vector~SingleCommand~
+        - ref_ : unsigned int
+        - owner_ : Robot _ptr_
+        - input_ : Input _ptr_
+        - output_ : Output _ptr_
+        $+ kAllCmd : vector~string~
+        + Command(o, in, out) : [[constructor]]
+        + runRefCommand() : void
+        + appendToList(name, index) : void
+    }
+    class SingleCommand["Core::Command::SingleCommand"] {
+        $+ kNullVacant : int
+        + cmd_name_ : string
+        + vacant_index_ : int
+        + id_ : unsigned int
+        + SingleCommand(cn, id, vi) : [[constructor]]
+    }
+
+    class Game["Core::Game"] {
+        + available_cmd_ : vector~string~
+        + game_input_ : Input
+        + game_output_ : Output
+        + game_vacant_ : Vacant
+        + game_robot_ : Robot
+        + Game() : [[constructor]]
+        + initialize(a, ps, ns, cmd) : void
+    }
+    SingleCommand --o "*" Command : inline struct / member
+    Command --o "1" Robot : member
+    Robot --o "1" Command : member / used in function
+    Robot --o "*" Game : member
+    Input --o "1" Game : member
+    Output --o "1" Game : member
+    Vacant --o "1" Game : member
+    Input --o "1" Command : transport by Game -> Robot -> Command
+    Output --o "1" Command
+    Vacant --o "1" Command
+
+    note for SingleCommand "Use id to specify different commands"

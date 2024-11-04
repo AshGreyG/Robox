@@ -4,6 +4,7 @@
 #include <queue>
 #include <vector>
 #include <string>
+#include <array>
 
 namespace Core {
 
@@ -21,6 +22,7 @@ enum LogLocation {
 void logMessage(const std::string& message, LogLocation loc, LogType type);
 
 class Robot;
+class Game;
 
 class Input {
   public:
@@ -41,7 +43,7 @@ class Command {
   private:
     class SingleCommand {
       public:
-        static const int kNullVacant = -1;
+        static constexpr int kNullVacant = -1;
         std::string cmd_name_;
         int vacant_index_;
         unsigned int id_;
@@ -52,17 +54,23 @@ class Command {
 
     std::vector<SingleCommand> list_;
     unsigned int ref_;
+    Game* game_;
     Robot* owner_;
     Input* input_;
     Output* output_;
     Vacant* vacant_;
 
+    bool checkOpindexSurplus();
+    bool checkOpindexInvalid();
+    
+    // `Opindex` stands for `Operated Index`
+
   public:
     static unsigned int kCmdCount;
-    static std::vector<std::string> kAllCmd;
+    static std::array<std::string, 8> kAllCmd;
 
-    Command(Robot* o, Input* in, Output* out, Vacant* vac)
-        : owner_(o), input_(in), output_(out), vacant_(vac) {}
+    Command(Game* g, Robot* o, Input* in, Output* out, Vacant* vac)
+        : game_(g), owner_(o), input_(in), output_(out), vacant_(vac) {}
     ~Command() = default;
     void runRefCommand();
     void appendToList(const std::string& name, int index);
@@ -74,10 +82,10 @@ class Robot {
     int handbox_;
     bool handbox_state_;
   public:
-    static const int kEmptyHandbox = 0;
+    static constexpr int kEmptyHandbox = 0;
     
-    Robot(Input* in, Output* out, Vacant* vac, bool hs = true)
-        : handbox_(kEmptyHandbox), handbox_state_(hs), cmd_(this, in, out, vac) {}
+    Robot(Game* g, Input* in, Output* out, Vacant* vac, bool hs = true)
+        : handbox_(kEmptyHandbox), handbox_state_(hs), cmd_(g, this, in, out, vac) {}
     
     // Use `true`  to denote robot doesn't take any box in hand.
     // Use `false` to denote robot take a box.
@@ -91,7 +99,7 @@ class Robot {
 };
 
 class Game {
-  public:
+  private:
     bool game_state_ = true;
     std::vector<std::string> available_cmd_;
     std::vector<int> provided_seq_, needed_seq_;
@@ -100,13 +108,15 @@ class Game {
     Input game_input_;
     Output game_output_;
     Vacant game_vacant_;
-    Game() : game_robot_(&game_input_, &game_output_, &game_vacant_) {}
+  public:
+    Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) {}
     void initialize(std::vector<std::string>& a,
                     std::vector<int>& ps,
                     std::vector<int>& ns,
                     std::vector<std::pair<std::string, int>>& cmd,
                     int vs);
     bool getState() { return game_state_; }
+    void setState(bool s) { game_state_ = s; }
 };
 
 }

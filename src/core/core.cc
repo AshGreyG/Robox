@@ -37,7 +37,7 @@ void Core::logMessage(const std::string &message, Core::LogLocation loc, Core::L
 }
 
 unsigned int Core::Command::kCmdCount = 0;
-std::vector<std::string> Core::Command::kAllCmd = {
+std::array<std::string, 8> Core::Command::kAllCmd = {
     "inbox", "outbox", "add", "sub",
     "copyto", "copyfrom", "jump", "jumpifzero"
 };
@@ -95,6 +95,89 @@ void Core::Game::initialize(std::vector<std::string>& a,
                      Core::LogType::kInfo);
 }
 
+bool Core::Command::checkOpindexSurplus() {
+    if (list_[ref_].vacant_index_ != Core::Command::SingleCommand::kNullVacant) {
+        game_->setState(false);
+        std::cout << "Error on instruction " + std::to_string(ref_ + 1) << std::endl;
+        Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                         " : Surplus operated vacant index, the "
+                         "command `" + list_[ref_].cmd_name_ + "` doesn't need an operated "
+                         "vacant index.", 
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kError);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool Core::Command::checkOpindexInvalid() {
+    if (list_[ref_].vacant_index_ >= vacant_->seq_.size()) {
+        game_->setState(false);
+        std::cout << "Error on instruction " + std::to_string(ref_ + 1) << std::endl;
+        Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                         " : Invalid operated vacant index, index (" +
+                         std::to_string(list_[ref_].vacant_index_) + 
+                         ") is greater than vacant size (" +
+                         std::to_string(vacant_->seq_.size()) + ".", 
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kError);
+        return true;
+    } else if (list_[ref_].vacant_index_ < 0) {
+        game_->setState(false);
+        std::cout << "Error on instruction " + std::to_string(ref_ + 1) << std::endl;
+        Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                         " : Invalid operated vacant index, index (" +
+                         std::to_string(list_[ref_].vacant_index_) + 
+                         ") is less than vacant size (" +
+                         std::to_string(vacant_->seq_.size()) + ".", 
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kError);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void Core::Command::runRefCommand() {
     int index = std::find(kAllCmd.begin(), kAllCmd.end(), list_[ref_].cmd_name_) - kAllCmd.begin();
+    switch (index) {
+    case 0 : // "inbox"
+        if (checkOpindexSurplus()) return;
+        owner_->setValue(input_->seq_.front());
+        owner_->setState(false);
+        input_->seq_.pop();
+        Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                         " : Robot takes the box (value : " + 
+                         std::to_string(owner_->getValue()) + ") from the input.", 
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kInfo);
+        break;
+    case 1 : // "outbox"
+        if (checkOpindexSurplus()) return;
+        if (owner_->isEmpty()) {
+            std::cout << "Error on instruction " + std::to_string(ref_ + 1) << std::endl;
+            Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                             " : Robot doesn't take any box, but the command "
+                             "`outbox` means put the handbox down.", 
+                             Core::LogLocation::kCore, 
+                             Core::LogType::kError);
+            game_->setState(false);
+            return;
+        } else {
+            output_->seq_.push(owner_->getValue());
+            owner_->setValue(Core::Robot::kEmptyHandbox);
+            owner_->setState(true);
+            Core::logMessage("Command ID " + std::to_string(ref_ + 1) +
+                             " : Robot puts the handbox (value : " +
+                             std::to_string(output_->seq_.back()) +
+                             ") down on the output.", 
+                             Core::LogLocation::kCore, 
+                             Core::LogType::kInfo);
+        }
+        break;
+    case 2 : // "add"
+        if (checkOpindexInvalid()) return;
+        break;
+    }
 }

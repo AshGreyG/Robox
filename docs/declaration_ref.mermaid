@@ -63,5 +63,6 @@ classDiagram
     Input --o "1" Command : transport by Game -> Robot -> Command
     Output --o "1" Command
     Vacant --o "1" Command
+    Command --o "1" Game : influence the game state
 
     note for SingleCommand "Use id to specify different commands"

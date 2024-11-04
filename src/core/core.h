@@ -36,11 +36,12 @@ class Output {
 
 class Vacant {
   public:
+    std::vector<bool> seq_empty_;
     std::vector<int> seq_;
 };
 
 class Command {
-  private:
+  public:
     class SingleCommand {
       public:
         static constexpr int kNullVacant = -1;
@@ -51,7 +52,17 @@ class Command {
             : cmd_name_(cn), id_(id), vacant_index_(vi) {}
         ~SingleCommand() = default;
     };
+    static unsigned int kCmdCount;
+    static std::array<std::string, 8> kAllCmd;
 
+    Command(Game* g, Robot* o, Input* in, Output* out, Vacant* vac)
+        : game_(g), owner_(o), input_(in), output_(out), vacant_(vac) {}
+    ~Command() = default;
+    void runRefCommand();
+    void appendToList(const std::string& name, int index);
+
+  private:
+    
     std::vector<SingleCommand> list_;
     unsigned int ref_;
     Game* game_;
@@ -62,18 +73,12 @@ class Command {
 
     bool checkOpindexSurplus();
     bool checkOpindexInvalid();
+    bool checkHandboxEmpty();
+    bool checkCmindexInvalid();
     
     // `Opindex` stands for `Operated Index`
+    // `Cmindex` stands for `Command Index`
 
-  public:
-    static unsigned int kCmdCount;
-    static std::array<std::string, 8> kAllCmd;
-
-    Command(Game* g, Robot* o, Input* in, Output* out, Vacant* vac)
-        : game_(g), owner_(o), input_(in), output_(out), vacant_(vac) {}
-    ~Command() = default;
-    void runRefCommand();
-    void appendToList(const std::string& name, int index);
 };
 
 class Robot {

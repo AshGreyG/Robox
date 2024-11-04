@@ -1,3 +1,0 @@
-D:\AshGrey\Tools\Qt\Tools\CMake_64\bin\cmake.exe -E rm -f CMakeFiles\Robox.dir/objects.a
-D:\AshGrey\Tools\Qt\Tools\mingw1120_64\bin\ar.exe qc CMakeFiles\Robox.dir/objects.a @CMakeFiles\Robox.dir\objects1.rsp
-D:\AshGrey\Tools\Qt\Tools\mingw1120_64\bin\g++.exe -g -mwindows -Wl,--whole-archive CMakeFiles\Robox.dir/objects.a -Wl,--no-whole-archive -o Robox.exe -Wl,--out-implib,libRobox.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Robox.dir\linkLibs.rsp

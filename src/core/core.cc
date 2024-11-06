@@ -5,13 +5,14 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <thread>
 
 void Core::logMessage(const std::string &message, Core::LogLocation loc, Core::LogType type) {
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H-:%M:%S") 
+    ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H:%M:%S") 
        << std::setw(3) << std::setfill('0') << ms.count();
     std::string loc_str = (loc == Core::LogLocation::kCore) ? "CORE"
                         : (loc == Core::LogLocation::kCli)  ? "CLI"
@@ -204,6 +205,13 @@ bool Core::Command::checkCmindexInvalid() {
 }
 
 void Core::Command::runRefCommand() {
+    if (ref_ == list_.size()) {
+        game_->setState(false);
+        Core::logMessage("All command has been executed.",
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kInfo);
+        return;
+    }
     int index = std::find(kAllCmd.begin(), kAllCmd.end(), list_[ref_].cmd_name_) - kAllCmd.begin();
     switch (index) {
     case 0 : // "inbox"
@@ -230,6 +238,7 @@ void Core::Command::runRefCommand() {
                          ") down on the output.", 
                          Core::LogLocation::kCore, 
                          Core::LogType::kInfo);
+        ref_++;
         break;
     case 2 : // "add"
         if (checkHandboxEmpty()) return;
@@ -259,6 +268,7 @@ void Core::Command::runRefCommand() {
                          std::to_string(owner_->getValue()), 
                          Core::LogLocation::kCore, 
                          Core::LogType::kInfo);
+        ref_++;
         break;
     case 4 : // "copyto"
         if (checkHandboxEmpty()) return;
@@ -292,6 +302,7 @@ void Core::Command::runRefCommand() {
                          std::to_string(ref_ + 1) + " command", 
                          Core::LogLocation::kCore, 
                          Core::LogType::kInfo);
+        ref_++;
         break;
     case 7 : // jumpifzero
         if (owner_->getValue() == 0) {
@@ -306,5 +317,12 @@ void Core::Command::runRefCommand() {
         } else {
             ref_++;
         }
+    }
+}
+
+void Core::Game::runAll() {
+    while (game_state_) {
+        game_robot_.runRefCommand();
+        std::this_thread::sleep_for(std::chrono::seconds(game_gap_));
     }
 }

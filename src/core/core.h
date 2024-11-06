@@ -100,12 +100,14 @@ class Robot {
     void setValue(int v) { handbox_ = v; }
     bool isEmpty() { return handbox_state_; }
     void setState(bool s) { handbox_state_ = s; }
+    void runRefCommand() { cmd_.runRefCommand(); }
     void initCommandList(const std::string& name, int index);
 };
 
 class Game {
   private:
     bool game_state_ = true;
+    int game_gap_ = 5;
     std::vector<std::string> available_cmd_;
     std::vector<int> provided_seq_, needed_seq_;
     int vac_size_;
@@ -113,6 +115,7 @@ class Game {
     Input game_input_;
     Output game_output_;
     Vacant game_vacant_;
+
   public:
     Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) {}
     void initialize(std::vector<std::string>& a,
@@ -122,6 +125,12 @@ class Game {
                     int vs);
     bool getState() { return game_state_; }
     void setState(bool s) { game_state_ = s; }
+    int getGap() { return game_gap_; }
+    void setGap(int v) { game_gap_ = v; }
+    void runAll();
+    void runTo(int target_ref);
+    void pause();
+    void restart();
 };
 
 }

@@ -25,10 +25,19 @@ set(PROJECT_SOURCES
         ${TS_FILES}
 )
 
+set(TEST_1_SOURCES
+        src/core/core.h
+        src/core/core.cc
+        test/test1.cpp
+)
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Robox
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+    )
+    qt_add_executable(Test-1
+        ${TEST_1_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Robox APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -46,6 +55,9 @@ else()
     else()
         add_executable(Robox
             ${PROJECT_SOURCES}
+        )
+        add_executable(Test-1
+            ${TEST_1_SOURCES}
         )
     endif()
 

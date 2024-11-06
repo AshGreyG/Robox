@@ -46,10 +46,9 @@ class Command {
       public:
         static constexpr int kNullVacant = -1;
         std::string cmd_name_;
-        int vacant_index_;
-        unsigned int id_;
-        SingleCommand(const std::string& cn, unsigned int id, int vi = kNullVacant)
-            : cmd_name_(cn), id_(id), vacant_index_(vi) {}
+        int target_index_;
+        SingleCommand(const std::string& cn, int vi = kNullVacant)
+            : cmd_name_(cn), target_index_(vi) {}
         ~SingleCommand() = default;
     };
     static unsigned int kCmdCount;
@@ -60,11 +59,13 @@ class Command {
     ~Command() = default;
     void runRefCommand();
     void appendToList(const std::string& name, int index);
+    int getRef() { return ref_; }
+    void setRef(int r) { ref_ = r; }
 
   private:
     
     std::vector<SingleCommand> list_;
-    unsigned int ref_;
+    unsigned int ref_ = 1;
     Game* game_;
     Robot* owner_;
     Input* input_;
@@ -75,6 +76,7 @@ class Command {
     bool checkOpindexInvalid();
     bool checkHandboxEmpty();
     bool checkCmindexInvalid();
+    bool checkInputEmpty();
     
     // `Opindex` stands for `Operated Index`
     // `Cmindex` stands for `Command Index`
@@ -96,18 +98,28 @@ class Robot {
     // Use `false` to denote robot take a box.
 
     ~Robot() = default;
+
+    // These functions are designed to interact with Game
+
     int getValue() { return handbox_; }
     void setValue(int v) { handbox_ = v; }
     bool isEmpty() { return handbox_state_; }
     void setState(bool s) { handbox_state_ = s; }
+
+    // These functions are designed to pass the information of command list
+
     void runRefCommand() { cmd_.runRefCommand(); }
+    int getRef() { return cmd_.getRef(); }
+    void setRef(int r) { cmd_.setRef(r); }
+
     void initCommandList(const std::string& name, int index);
 };
 
 class Game {
   private:
     bool game_state_ = true;
-    int game_gap_ = 5;
+    bool error_state_ = false;
+    int game_gap_ = 0;
     std::vector<std::string> available_cmd_;
     std::vector<int> provided_seq_, needed_seq_;
     int vac_size_;
@@ -116,6 +128,8 @@ class Game {
     Output game_output_;
     Vacant game_vacant_;
 
+    void check();
+
   public:
     Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) {}
     void initialize(std::vector<std::string>& a,
@@ -123,13 +137,15 @@ class Game {
                     std::vector<int>& ns,
                     std::vector<std::pair<std::string, int>>& cmd,
                     int vs);
-    bool getState() { return game_state_; }
-    void setState(bool s) { game_state_ = s; }
+    bool getGameState() { return game_state_; }
+    void setGameState(bool s) { game_state_ = s; }
+    bool getErrorState() { return error_state_; }
+    void setErrorState(bool e) { error_state_ = e; }
     int getGap() { return game_gap_; }
     void setGap(int v) { game_gap_ = v; }
     void runAll();
     void runTo(int target_ref);
-    void pause();
+    void pause() { game_state_ = false; }
     void restart();
 };
 

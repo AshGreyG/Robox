@@ -25,10 +25,18 @@ set(PROJECT_SOURCES
         ${TS_FILES}
 )
 
-set(TEST_1_SOURCES
+set(TEST_CORE_1_SOURCES
         src/core/core.h
         src/core/core.cc
-        test/test1.cpp
+        test/test_core_1.cpp
+)
+
+set(TEST_CONSOLE_SORCES
+        src/core/core.h
+        src/core/core.cc
+        src/cli/console.h
+        src/cli/console.cc
+        test/test_console.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -36,8 +44,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
-    qt_add_executable(Test-1
-        ${TEST_1_SOURCES}
+    qt_add_executable(Test-Core-1
+        ${TEST_CORE_1_SOURCES}
+    )
+    qt_add_executable(Test-Console
+        ${TEST_CONSOLE_SORCES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Robox APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -56,8 +67,11 @@ else()
         add_executable(Robox
             ${PROJECT_SOURCES}
         )
-        add_executable(Test-1
-            ${TEST_1_SOURCES}
+        add_executable(Test-Core-1
+            ${TEST_CORE_1_SOURCES}
+        )
+        add_executable(Test-Console
+            ${TEST_CONSOLE_SORCES}
         )
     endif()
 

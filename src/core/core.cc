@@ -88,7 +88,7 @@ void Core::Game::initialize(std::vector<std::string>& a,
     provided_seq_ = std::move(ps);
     needed_seq_ = std::move(ns);
     for (const auto& e : provided_seq_) {
-        game_input_.seq_.push(e);
+        game_input_.seq_.push_back(e);
     }
     for (auto it = cmd.begin(); it < cmd.end(); ++it) {
         auto& [name, index] = *it;
@@ -238,7 +238,7 @@ void Core::Command::runRefCommand() {
         if (checkInputEmpty()) return;
         owner_->setValue(input_->seq_.front());
         owner_->setState(false);
-        input_->seq_.pop();
+        input_->seq_.pop_front();
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot takes the box (value : " + 
                          std::to_string(owner_->getValue()) + ") from the input.", 
@@ -249,7 +249,7 @@ void Core::Command::runRefCommand() {
     case 1 : // "outbox"
         if (checkOpindexSurplus()) return;
         if (checkHandboxEmpty()) return;
-        output_->seq_.push(owner_->getValue());
+        output_->seq_.push_back(owner_->getValue());
         owner_->setValue(Core::Robot::kEmptyHandbox);
         owner_->setState(true);
         Core::logMessage("Command ID " + std::to_string(ref_) +
@@ -346,7 +346,7 @@ void Core::Game::check() {
     f = (game_output_.seq_.size() == needed_seq_.size());
     while (game_output_.seq_.size() != 0) {
         int e = game_output_.seq_.front();
-        game_output_.seq_.pop();
+        game_output_.seq_.pop_front();
         if (e != needed_seq_[count]) {
             f = false;
             break;
@@ -367,8 +367,8 @@ void Core::Game::check() {
 }
 
 void Core::Game::runAll() {
-    game_state_ = true;
-    while (game_state_) {
+    game_state_ = !error_state_;
+    while (game_state_ && !error_state_) {
         game_robot_.runRefCommand();
         std::this_thread::sleep_for(std::chrono::seconds(game_gap_));
     }
@@ -376,8 +376,8 @@ void Core::Game::runAll() {
 }
 
 void Core::Game::runTo(int target_ref) {
-    game_state_ = true;
-    while (game_state_) {
+    game_state_ = !error_state_;
+    while (game_state_ && error_state_) {
         game_robot_.runRefCommand();
         if (target_ref == game_robot_.getRef()) {
             game_state_ = false;
@@ -393,13 +393,9 @@ void Core::Game::restart() {
     game_robot_.setRef(1);
     game_vacant_.seq_.clear();
     game_vacant_.seq_empty_.clear();
-    while (game_output_.seq_.size() != 0) {
-        game_output_.seq_.pop();
-    }
-    while (game_input_.seq_.size() != 0) {
-        game_input_.seq_.pop();
-    }
+    game_input_.seq_.clear();
+    game_output_.seq_.clear();
     for (const auto& e : provided_seq_) {
-        game_input_.seq_.push(e);
+        game_input_.seq_.push_back(e);
     }
 }

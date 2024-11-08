@@ -1,10 +1,10 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <queue>
 #include <vector>
 #include <string>
 #include <array>
+#include <deque>
 
 namespace Core {
 
@@ -26,12 +26,12 @@ class Game;
 
 class Input {
   public:
-    std::queue<int> seq_;
+    std::deque<int> seq_;
 };
 
 class Output {
   public:
-    std::queue<int> seq_;
+    std::deque<int> seq_;
 };
 
 class Vacant {

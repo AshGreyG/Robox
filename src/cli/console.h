@@ -2,7 +2,6 @@
 #define TERMINAL_H
 
 #include <core/core.h>
-#include <windows.h>
 
 namespace Cli {
 
@@ -53,8 +52,6 @@ class GamePanel {
     char input_key_;
 
 
-    HANDLE hOut;
-    CONSOLE_SCREEN_BUFFER_INFO bInfo;
 
     void setCursorPos(short x, short y);
     void clearScreen();

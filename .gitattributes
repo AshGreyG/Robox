@@ -1,2 +1,2 @@
-.ts linguist-language=C++
-.mermaid linguist-language=Mermaid
+*.ts linguist-language=C++
+*.mermaid linguist-language=Mermaid

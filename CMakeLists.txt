@@ -10,9 +10,12 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CURSES_NEED_NCURSES TRUE)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Curses REQUIRED)
+
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -28,7 +31,7 @@ set(TEST_CORE_1_SOURCES
         test/test_core_1.cpp
 )
 
-set(TEST_CONSOLE_SORCES
+set(TEST_CONSOLE_SOURCES
         src/core/core.h
         src/core/core.cc
         src/cli/console.h
@@ -45,7 +48,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${TEST_CORE_1_SOURCES}
     )
     qt_add_executable(Test-Console
-        ${TEST_CONSOLE_SORCES}
+        ${TEST_CONSOLE_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Robox APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -67,7 +70,7 @@ else()
             ${TEST_CORE_1_SOURCES}
         )
         add_executable(Test-Console
-            ${TEST_CONSOLE_SORCES}
+            ${TEST_CONSOLE_SOURCES}
         )
     endif()
 
@@ -89,6 +92,13 @@ set_target_properties(Robox PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+target_compile_options(Test-Console PRIVATE ${CURSES_CFLAGS})
+target_link_libraries(Test-Console PRIVATE ${CURSES_LIBRARIES})
+include_directories(Test-Console PRIVATE ${CURSES_INCLUDE_DIRS})
+
+# Notice that Test-Console, Test-Core-1, Robox are all TARGETS!!!, so 
+# Test-Console also needs the ncurses library
+
 include(GNUInstallDirs)
 install(TARGETS Robox
     BUNDLE DESTINATION .
@@ -99,3 +109,4 @@ install(TARGETS Robox
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Robox)
 endif()
+

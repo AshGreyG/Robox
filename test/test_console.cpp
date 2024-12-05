@@ -17,6 +17,7 @@ int main() {
                     command,
                     0);
     game.runAll();
-    Cli::GamePanel ui(&game);
+    Cli::GamePanel tui(&game);
+    tui.run();
     return 0;
 }

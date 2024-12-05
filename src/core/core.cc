@@ -7,6 +7,13 @@
 #include <algorithm>
 #include <thread>
 
+/**
+ * @program:     Core::logMessage
+ * @description: This is a logger function, the format is "level [time] #(location) message"
+ * @message:     The detail of log message
+ * @loc:         The location where message comes from, there are three locations : core, cli and gui
+ * @type:        The type (or level) of message, there are two types : Info < Error
+ */
 void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::LogType type) {
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
@@ -14,10 +21,18 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     std::stringstream ss;
     ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H:%M:%S:") 
        << std::setw(3) << std::setfill('0') << ms.count();
+
+    // Get the timestamp
+
     std::string loc_str = (loc == Core::LogLocation::kCore) ? "CORE"
                         : (loc == Core::LogLocation::kCli)  ? "CLI"
                         : (loc == Core::LogLocation::kGui)  ? "GUI"
                         : "UNKNOWN";
+
+    // Get the location string : Core::LogLocation::kCore => "CORE"
+    //                           Core::LogLocation::kCli  => "CLI"
+    //                           Core::LogLocation::kGui  => "GUI"
+
     if (type == Core::LogType::kInfo) {
         std::clog << "Info  ["
                   << ss.str() 
@@ -37,12 +52,19 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     }
 }
 
-unsigned int Core::Command::kCmdCount = 0;
+unsigned int Core::Command::kCmdCount = 0;              // Counts from 0
+
 std::array<std::string, 8> Core::Command::kAllCmd = {
     "inbox", "outbox", "add", "sub",
     "copyto", "copyfrom", "jump", "jumpifzero"
 };
 
+/**
+ * @program:     Core::Command::appendToList
+ * @description: This function passes the command name and vacant index to the inner class Command
+ * @name:        The name of command, see Core::Command::kAllCmd
+ * @index:       The index of vacant
+ */
 void Core::Command::appendToList(const std::string& name, int index) {
     kCmdCount++;
     list_.emplace_back(name, index);
@@ -53,6 +75,12 @@ void Core::Command::appendToList(const std::string& name, int index) {
                      Core::LogType::kInfo);
 }
 
+/**
+ * @program:     Core::Robot::initCommandList
+ * @description: This function passes the command name and vacant index to the Core::Command::appendToList
+ * @name:        The name of command, see Core::Command::kAllCmd
+ * @index:       The index of vacant
+ */
 void Core::Robot::initCommandList(const std::string& name, int index) {
     cmd_.appendToList(name, index);
     Core::logMessage("Pass command name and operated index of "
@@ -62,20 +90,36 @@ void Core::Robot::initCommandList(const std::string& name, int index) {
                      Core::LogType::kInfo);
 }
 
+/**
+ * @program:     Core::Game::initialize
+ * @description: This function initialize the available commands, provided sequence,  
+                 needed sequence and commans and vacant size to the game private members.
+ * @a:           Available commands, it will display on the top of Game UI
+ * @ps:          Provided sequence
+ * @ns:          Needed sequence
+ * @cmd:         Commands, they are the pair of command name and vacant index (default kNullVacant)
+ * @vs:          The size of vacant
+ */
 void Core::Game::initialize(std::vector<std::string>& a,
                             std::vector<int>& ps,
                             std::vector<int>& ns,
                             std::vector<std::pair<std::string, int>>& cmd,
                             int vs) {
-    vac_size_ = vs;
+    vac_size_ = vs;                                 // pass the size of vacant
     for (int i = 1; i <= vs; ++i) {
-        game_vacant_.seq_.push_back(0);
-        game_vacant_.seq_empty_.push_back(true);
+        game_vacant_.seq_.push_back(0);             // Default num is 0
+        game_vacant_.seq_empty_.push_back(true);    // Default is empty
     }
-    game_vacant_.seq_.resize(vs);
-    available_cmd_ = std::move(a);
+    game_vacant_.seq_.resize(vs);                   // The vacant resizes to the given size
+    available_cmd_ = std::move(a);                  // Pass the available command to the private member
+    provided_seq_ = std::move(ps);                  // Pass the provided sequence to the private member
+    needed_seq_ = std::move(ns);                    // Pass the needed sequence to the private member
+
     for (const auto& str : available_cmd_) {
         if (std::find(Core::Command::kAllCmd.begin(), Core::Command::kAllCmd.end(), str) == Core::Command::kAllCmd.end()) {
+
+            // This condition means the str is illegal, so we need error here and return
+
             Core::logMessage("Unknown command `" + str + "`, please check "
                              "the entire supported command list by typing key `?`.", 
                              Core::LogLocation::kCore, 
@@ -85,14 +129,18 @@ void Core::Game::initialize(std::vector<std::string>& a,
             return;
         }
     }
-    provided_seq_ = std::move(ps);
-    needed_seq_ = std::move(ns);
+
     for (const auto& e : provided_seq_) {
         game_input_.seq_.push_back(e);
     }
+
     for (auto it = cmd.begin(); it < cmd.end(); ++it) {
         auto& [name, index] = *it;
         if (std::find(available_cmd_.begin(), available_cmd_.end(), name) == available_cmd_.end()) {
+
+            // This condition means the command name is not in the available commands, 
+            // so we need error here and return
+
             std::cout << "Error on instruction " + std::to_string(it - cmd.begin() + 1) << std::endl;
             Core::logMessage("Command ID " + std::to_string(it - cmd.begin() + 1) + 
                              " : Unkown command `" + name + "`, please "
@@ -106,6 +154,7 @@ void Core::Game::initialize(std::vector<std::string>& a,
         }
         game_robot_.initCommandList(name, index);
     }
+
     Core::logMessage("Initialize the following variable : `Core::"
                      "Game::[vac_size_ | game_vacant_ | available_"
                      "cmd_ | provided_seq_ | needed_seq_ | game_input_ | "
@@ -114,8 +163,16 @@ void Core::Game::initialize(std::vector<std::string>& a,
                      Core::LogType::kInfo);
 }
 
+/**
+ * @program: 
+ * @description: This function is to check the operated index (the operated
+                 vacant index of the command that is executed now)
+ */
 bool Core::Command::checkOpindexSurplus() {
     if (list_[ref_ - 1].target_index_ != Core::Command::SingleCommand::kNullVacant) {
+
+        // Notice referrence begins from **1** !!!, 
+
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
@@ -223,14 +280,22 @@ bool Core::Command::checkInputEmpty() {
     }
 }
 
+/**
+ * @program:     Core::Command::runRefCommand
+ * @description: This function is to run the referrence command
+ */
 void Core::Command::runRefCommand() {
     if (ref_ == list_.size() + 1) {
+
+        // All the commands have been executed, so we set the game state false
+
         game_->setGameState(false);
         Core::logMessage("All command has been executed.",
                          Core::LogLocation::kCore, 
                          Core::LogType::kInfo);
         return;
     }
+    
     int index = std::find(kAllCmd.begin(), kAllCmd.end(), list_[ref_ - 1].cmd_name_) - kAllCmd.begin();
     switch (index) {
     case 0 : // "inbox"

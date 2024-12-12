@@ -1,3 +1,12 @@
+//======================================================//
+// Copyright (c) 2024 AshGrey. All rights reserved.     //
+// Released under MIT license as described in the file  //
+// LICENSE.                                             //
+// Author: AshGrey (He Yuhui)                           //
+//                                                      //
+// This file is the implement of header file `core.h`   //
+//======================================================//
+
 #include "core.h"
 #include <iostream>
 #include <chrono>
@@ -164,14 +173,15 @@ void Core::Game::initialize(std::vector<std::string>& a,
 }
 
 /**
- * @program: 
- * @description: This function is to check the operated index (the operated
-                 vacant index of the command that is executed now)
+ * @program:     Core::Command::checkOpindexSurplus
+ * @description: This function is to check if the operated index (the operated 
+                 vacant index of the command that is executed now) is surplus
  */
 bool Core::Command::checkOpindexSurplus() {
     if (list_[ref_ - 1].target_index_ != Core::Command::SingleCommand::kNullVacant) {
 
-        // Notice referrence begins from **1** !!!, 
+        // Notice referrence begins from **1** !!!, only use this function in no-parameter
+        // command. If the no-parameter command has target index, then we need to error here
 
         game_->setGameState(false);
         game_->setErrorState(true);
@@ -188,27 +198,39 @@ bool Core::Command::checkOpindexSurplus() {
     }
 }
 
+/**
+ * @program:     Core::Command::checkOpindexInvalid
+ * @description: This function is to check if the operated index (the operated
+                 vacant index of the command that is executed now) is invalid
+ */
 bool Core::Command::checkOpindexInvalid() {
-    if (list_[ref_ - 1].target_index_ > vacant_->seq_.size()) {
+    if (list_[ref_ - 1].target_index_ >= vacant_->seq_.size()) {
+
+        // vacant index is greater than or equal to the size of vacant
+        // notice that the sequence of vacant counts from 0 !!!
+
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Invalid operated vacant index, index (" +
                          std::to_string(list_[ref_ - 1].target_index_) + 
-                         ") is greater than vacant size (" +
+                         ") is greater than or equal to vacant size (" +
                          std::to_string(vacant_->seq_.size()) + ".", 
                          Core::LogLocation::kCore, 
                          Core::LogType::kError);
         return true;
-    } else if (list_[ref_ - 1].target_index_ <= 0) {
+    } else if (list_[ref_ - 1].target_index_ < 0) {
+
+        // vacant index is less than 0
+
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Invalid operated vacant index, index (" +
                          std::to_string(list_[ref_ - 1].target_index_) + 
-                         ") is less than 1.",
+                         ") is less than 0.",
                          Core::LogLocation::kCore, 
                          Core::LogType::kError);
         return true;
@@ -216,6 +238,10 @@ bool Core::Command::checkOpindexInvalid() {
              || list_[ref_ - 1].cmd_name_ == "sub"
              || list_[ref_ - 1].cmd_name_ == "copyfrom")
              && vacant_->seq_empty_[list_[ref_ - 1].target_index_ - 1]) {
+        
+        // The target vacant is empty
+        // for command "add", "sub" and "copyfrom", the target vacant cannot be empty!
+
         game_->setGameState(false);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
         Core::logMessage("Command ID " + std::to_string(ref_) +
@@ -228,6 +254,11 @@ bool Core::Command::checkOpindexInvalid() {
     }
 }
 
+/**
+ * @program:     Core::Command::checkHandboxEmpty
+ * @description: This function is to check if there is a box in robot's hand.
+                 If there is, this function will return TRUE, otherwise FALSE
+ */
 bool Core::Command::checkHandboxEmpty() {
     if (owner_->isEmpty()) {
         game_->setGameState(false);
@@ -268,6 +299,10 @@ bool Core::Command::checkCmindexInvalid() {
     }
 }
 
+/**
+ * @program:     Core::Command::checkInputEmpty
+ * @description: This function is to check if the input is empty.
+ */
 bool Core::Command::checkInputEmpty() {
     if (input_->seq_.size() == 0) {
         game_->setGameState(false);
@@ -277,6 +312,25 @@ bool Core::Command::checkInputEmpty() {
         return true;
     } else {
         return false;
+    }
+}
+
+/**
+ * @program:     Core::Command::checkVacantEmpty
+ * @description: This function is to check if the target vacant is empty
+ */
+bool Core::Command::checkVacantEmpty() {
+    if (!vacant_->seq_empty_[list_[ref_ - 1].target_index_]) {
+        game_->setErrorState(true);
+        game_->setGameState(false);
+        std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
+        Core::logMessage("Command ID " + std::to_string(ref_) + 
+                         " : This command needs the target vacant not empty.", 
+                         Core::LogLocation::kCore, 
+                         Core::LogType::kError);
+        return true;    // Empty
+    } else {
+        return false;   // Not empty
     }
 }
 
@@ -297,10 +351,14 @@ void Core::Command::runRefCommand() {
     }
     
     int index = std::find(kAllCmd.begin(), kAllCmd.end(), list_[ref_ - 1].cmd_name_) - kAllCmd.begin();
+
+    // Get the index of this command
+
     switch (index) {
     case 0 : // "inbox"
-        if (checkOpindexSurplus()) return;
-        if (checkInputEmpty()) return;
+        if (checkOpindexSurplus()) return;  // Check if vacant index is given, "inbox" command doesn't need parameter
+        if (checkInputEmpty()) return;      // Check if input is empty, if true, then the game ends
+
         owner_->setValue(input_->seq_.front());
         owner_->setState(false);
         input_->seq_.pop_front();
@@ -312,10 +370,11 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 1 : // "outbox"
-        if (checkOpindexSurplus()) return;
-        if (checkHandboxEmpty()) return;
-        output_->seq_.push_back(owner_->getValue());
-        owner_->setValue(Core::Robot::kEmptyHandbox);
+        if (checkOpindexSurplus()) return;  // Check if vacant index is given. "outbox" command doesn't need parameter
+        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "outbox" command needs the robot holds a box
+
+        output_->seq_.push_back(owner_->getValue());    // Put the box to output
+        owner_->setValue(Core::Robot::kEmptyHandbox);   // Robot doesn't hold this box anymore
         owner_->setState(true);
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot puts the handbox (value : " +
@@ -326,9 +385,14 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 2 : // "add"
-        if (checkHandboxEmpty()) return;
-        if (checkOpindexInvalid()) return;
-        owner_->setValue(owner_->getValue() + vacant_->seq_[list_[ref_ - 1].target_index_ - 1]);
+        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "add" command needs the robot holding a box
+        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid.
+        owner_->setValue(owner_->getValue() + vacant_->seq_[list_[ref_ - 1].target_index_]);
+        //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //                 Handbox Value                      Target Vacant Value
+        //                                    Notice command referrence begins from **1**
+        //                                    Vacant index begins from **0**
+
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot adds the number (" + 
                          std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
@@ -341,14 +405,19 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 3 : // "sub"
-        if (checkHandboxEmpty()) return;
-        if (checkOpindexInvalid()) return;
-        owner_->setValue(owner_->getValue() + vacant_->seq_[list_[ref_ - 1].target_index_ - 1]);
+        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "sub" command needs the robot holding a box
+        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
+        owner_->setValue(owner_->getValue() - vacant_->seq_[list_[ref_ - 1].target_index_]);
+        //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        //                 Handbox Value                    Target Vacant Value
+        //                                    Notice command referrence begins from **1**
+        //                                    Vacant index begins from **0**
+
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot subs the number (" +
-                         std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_ - 1]) +
+                         std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
                          ") of operated vacant index (" + 
-                         std::to_string(list_[ref_ - 1].target_index_ - 1) +
+                         std::to_string(list_[ref_ - 1].target_index_) +
                          "), and the handbox becomes " +
                          std::to_string(owner_->getValue()), 
                          Core::LogLocation::kCore, 
@@ -356,10 +425,10 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 4 : // "copyto"
-        if (checkHandboxEmpty()) return;
-        if (checkOpindexInvalid()) return;
-        vacant_->seq_[list_[ref_ - 1].target_index_ - 1] = owner_->getValue();
-        vacant_->seq_empty_[list_[ref_ - 1].target_index_ - 1] = false;
+        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "copyto" command needs the robot holding a box
+        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
+        vacant_->seq_[list_[ref_ - 1].target_index_] = owner_->getValue();  // Put the box to the vacant
+        vacant_->seq_empty_[list_[ref_ - 1].target_index_] = false;         // Set the vacant state to not-empty
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot copy its handbox to the number of operated vacant index (" +
                          std::to_string(list_[ref_ - 1].target_index_) + ").", 
@@ -368,7 +437,8 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 5 : // "copyfrom"
-        if (checkOpindexInvalid()) return;
+        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
+        if (checkVacantEmpty()) return;     // Check if the vacant is empty
         owner_->setValue(vacant_->seq_[list_[ref_ - 1].target_index_ - 1]);
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot copy from the number of operated vacant index (" +

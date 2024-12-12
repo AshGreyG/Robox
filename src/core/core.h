@@ -115,7 +115,7 @@ class Command {
     bool checkHandboxEmpty();
     bool checkCmindexInvalid(); // `Cmindex` stands for `Command Index`
     bool checkInputEmpty();
-    
+    bool checkVacantEmpty();
 
 };
 

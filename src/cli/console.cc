@@ -11,6 +11,7 @@ void Cli::GamePanel::initScreen() {
     initscr();
     raw();
     noecho();
+    cbreak();
     main_window_ = newwin(kGameConsoleHeight, kGameConsoleWidth, 0, 0);
     box(main_window_, 0, 0);
 
@@ -45,12 +46,55 @@ void Cli::GamePanel::initScreen() {
     wrefresh(main_window_);
 }
 
+/**
+ * @program:     Cli::GamePanel::showPaused
+ * @description: This function is to show the pause tab.
+ */
+void Cli::GamePanel::showPaused() {
+    werase(main_window_);
+
+    Core::logMessage("showPaused function clears the console content.", 
+                     Core::LogLocation::kCli,
+                     Core::LogType::kInfo);
+
+    int topleft_x = (kGameConsoleWidth - kGamePausedTitleWidth) / 2;
+    int topleft_y = (kGameConsoleHeight - kGamePausedTitleHeight) / 2;
+
+    // gametitle_topleft_x : The x coordinates of topleft corner of PausedTitle
+    // gametitle_topleft_y : The y coordinates of topleft corner of PausedTitle
+    
+    for (int i = topleft_y; i <= topleft_y + kGamePausedTitleHeight - 1; ++i) {
+        mvwaddwstr(main_window_, i, topleft_x, kGamePausedTitle[i - topleft_y]);
+    }
+
+    wrefresh(main_window_);
+
+    Core::logMessage("The paused title has been initialized", 
+                     Core::LogLocation::kCli, 
+                     Core::LogType::kInfo);
+
+}
+
 
 void Cli::GamePanel::run() {
     initScreen();
-    while (true) {
 
+    char ch;
+
+    while ((ch = wgetch(main_window_)) != 'q') {
+
+        // notice here needs to use wgetch(WINDOW *) rather than getch(), otherwise
+        // the window will get empty. All w* functions mean window*.
+
+        switch (ch) {
+        case 'p' :
+            showPaused();
+            wrefresh(main_window_);
+            break;
+        }
     }
+
+    endwin();
 }
 
 

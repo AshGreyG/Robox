@@ -32,8 +32,12 @@ class GamePanel {
         LR"*( | |    | (__| | | |__| | \____ \ \  __/ | (_| | )*",
         LR"*( |_|     \_____|  \____/  |_____/  \___|  \____| )*"
     };
+    constexpr static short kGamePausedTitleWidth  = 50;
+    constexpr static short kGamePausedTitleHeight = 7;
 
-    constexpr static wchar_t kGameInfo[][53] = {
+    // kGamePausedTitle is to show when the game is paused by player
+
+    constexpr static wchar_t kGameInfo[9][53] = {
         LR"*( Press `?` to display this info-panel again.        )*",
         LR"*( Press `i` to insert the next command.              )*",
         LR"*( Press `o` to open a command file from local.       )*",
@@ -41,21 +45,22 @@ class GamePanel {
         LR"*( Press `w` to write the commands to a new file.     )*",
         LR"*( Press `r` to restart the game.                     )*",
         LR"*( Press `d` to delete the target command and restart.)*",
+        LR"*( Press `q` to quit the game.)*",
         LR"*( Press **ANY KEY** to start the game...             )*"
     };
     constexpr static short kGameInfoWidth  = 53;
-    constexpr static short kGameInfoHeight = 8;
+    constexpr static short kGameInfoHeight = 9;
     
-    constexpr static short kGameConsoleWidth = 80;
+    constexpr static short kGameConsoleWidth = 140;
     constexpr static short kGameCenterX = kGameConsoleWidth / 2;
-    constexpr static short kGameConsoleHeight = 40;
+    constexpr static short kGameConsoleHeight = 30;
 
     Core::Game* game_;
     WINDOW* main_window_;
     char input_key_;
 
     void initScreen();
-    void getInput();
+    void showMain();
     void showPaused();
     void showHelp();
 

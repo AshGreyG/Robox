@@ -8,24 +8,7 @@ namespace Cli {
 
 class GamePanel {
   private:
-    // enum Color {
-    //     kBlack,         // 0
-    //     kBlue,          // 1
-    //     kGreen,         // 2
-    //     kCyan,          // 3
-    //     kRed,           // 4
-    //     kMagenta,       // 5
-    //     kBrown,         // 6
-    //     kLightGrey,     // 7
-    //     kDarkGrey,      // 8
-    //     kLightBlue,     // 9
-    //     kLightGreen,    // 10 A
-    //     kLightCyan,     // 11 B
-    //     kLightRed,      // 12 C
-    //     kLightMagenta,  // 13 D
-    //     kYellow,        // 14 E
-    //     kWhite          // 15 F
-    // };
+
     constexpr static wchar_t kGameMainTitle[7][53] = {
         LR"*(  ______    _____     _____      ____    __      __ )*",
         LR"*( |  ___ \  / ____ \  |  __ \   / ____ \  \ \    / / )*",
@@ -35,6 +18,10 @@ class GamePanel {
         LR"*( | |  \ \ | \____/ | | |__/ | | \____/ |  / /  \ \  )*",
         LR"*( |_|   \_\ \______/  |_____/   \______/  /_/    \_\ )*"
     };
+    constexpr static short kGameMainTitleWidth  = 53;
+    constexpr static short kGameMainTitleHeight = 7;
+
+    // kGameMainTitle is to show when the game starts
 
     constexpr static wchar_t kGamePausedTitle[7][50] = {
         LR"*(  _____                                          )*",
@@ -46,9 +33,18 @@ class GamePanel {
         LR"*( |_|     \_____|  \____/  |_____/  \___|  \____| )*"
     };
 
-    constexpr static wchar_t kGameInfo[][] = {
-
+    constexpr static wchar_t kGameInfo[][53] = {
+        LR"*( Press `?` to display this info-panel again.        )*",
+        LR"*( Press `i` to insert the next command.              )*",
+        LR"*( Press `o` to open a command file from local.       )*",
+        LR"*( Press `p` to pause the game.                       )*",
+        LR"*( Press `w` to write the commands to a new file.     )*",
+        LR"*( Press `r` to restart the game.                     )*",
+        LR"*( Press `d` to delete the target command and restart.)*",
+        LR"*( Press **ANY KEY** to start the game...             )*"
     };
+    constexpr static short kGameInfoWidth  = 53;
+    constexpr static short kGameInfoHeight = 8;
     
     constexpr static short kGameConsoleWidth = 80;
     constexpr static short kGameCenterX = kGameConsoleWidth / 2;

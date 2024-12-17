@@ -356,8 +356,13 @@ void Core::Command::runRefCommand() {
 
     switch (index) {
     case 0 : // "inbox"
-        if (checkOpindexSurplus()) return;  // Check if vacant index is given, "inbox" command doesn't need parameter
-        if (checkInputEmpty()) return;      // Check if input is empty, if true, then the game ends
+        if (checkOpindexSurplus()) return;
+        
+        // Check if vacant index is given, "inbox" command doesn't need parameter
+
+        if (checkInputEmpty()) return;
+        
+        // Check if input is empty, if true, then the game ends
 
         owner_->setValue(input_->seq_.front());
         owner_->setState(false);
@@ -370,8 +375,13 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 1 : // "outbox"
-        if (checkOpindexSurplus()) return;  // Check if vacant index is given. "outbox" command doesn't need parameter
-        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "outbox" command needs the robot holds a box
+        if (checkOpindexSurplus()) return;
+        
+        // Check if vacant index is given. "outbox" command doesn't need parameter
+
+        if (checkHandboxEmpty()) return;
+        
+        // Check if the handbox is empty. "outbox" command needs the robot holds a box
 
         output_->seq_.push_back(owner_->getValue());    // Put the box to output
         owner_->setValue(Core::Robot::kEmptyHandbox);   // Robot doesn't hold this box anymore
@@ -385,8 +395,14 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 2 : // "add"
-        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "add" command needs the robot holding a box
-        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid.
+        if (checkHandboxEmpty()) return;
+        
+        // Check if the handbox is empty. "add" command needs the robot holding a box
+
+        if (checkOpindexInvalid()) return;
+        
+        // Check if vacant index is invalid.
+
         owner_->setValue(owner_->getValue() + vacant_->seq_[list_[ref_ - 1].target_index_]);
         //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         //                 Handbox Value                      Target Vacant Value
@@ -405,8 +421,14 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 3 : // "sub"
-        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "sub" command needs the robot holding a box
-        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
+        if (checkHandboxEmpty()) return;
+        
+        // Check if the handbox is empty. "sub" command needs the robot holding a box
+
+        if (checkOpindexInvalid()) return;
+        
+        // Check if vacant index is invalid
+
         owner_->setValue(owner_->getValue() - vacant_->seq_[list_[ref_ - 1].target_index_]);
         //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         //                 Handbox Value                    Target Vacant Value
@@ -425,8 +447,14 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 4 : // "copyto"
-        if (checkHandboxEmpty()) return;    // Check if the handbox is empty. "copyto" command needs the robot holding a box
-        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
+        if (checkHandboxEmpty()) return;
+        
+        // Check if the handbox is empty. "copyto" command needs the robot holding a box
+
+        if (checkOpindexInvalid()) return;
+        
+        // Check if vacant index is invalid
+
         vacant_->seq_[list_[ref_ - 1].target_index_] = owner_->getValue();  // Put the box to the vacant
         vacant_->seq_empty_[list_[ref_ - 1].target_index_] = false;         // Set the vacant state to not-empty
         Core::logMessage("Command ID " + std::to_string(ref_) +
@@ -437,8 +465,14 @@ void Core::Command::runRefCommand() {
         ref_++;
         break;
     case 5 : // "copyfrom"
-        if (checkOpindexInvalid()) return;  // Check if vacant index is invalid
-        if (checkVacantEmpty()) return;     // Check if the vacant is empty
+        if (checkOpindexInvalid()) return;
+        
+        // Check if vacant index is invalid
+
+        if (checkVacantEmpty()) return;
+        
+        // Check if the vacant is empty
+
         owner_->setValue(vacant_->seq_[list_[ref_ - 1].target_index_ - 1]);
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot copy from the number of operated vacant index (" +
@@ -451,6 +485,9 @@ void Core::Command::runRefCommand() {
         break;
     case 6 : // jump
         if (checkCmindexInvalid()) return;
+        
+        // Check if there is the target command ID
+
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : Robot's current command jumps to the index " +
                          std::to_string(list_[ref_ - 1].target_index_) + " command", 
@@ -461,7 +498,13 @@ void Core::Command::runRefCommand() {
     case 7 : // jumpifzero
         if (owner_->getValue() == 0) {
             if (checkHandboxEmpty()) return;
+            
+            // Check if there is any box held by robot
+
             if (checkCmindexInvalid()) return;
+            
+            // Check if there is the target command ID
+
             ref_ = list_[ref_ - 1].target_index_;
             Core::logMessage("Command ID " + std::to_string(ref_) +
                              " : Robot's current command jumps to the index " +
@@ -474,11 +517,18 @@ void Core::Command::runRefCommand() {
     }
 }
 
+/**
+ * @program:     Core::Game::check
+ * @description: This function checks the game state when all commands have been executed 
+ *               or the input is empty
+ */
 void Core::Game::check() {
     if (error_state_) return;
+
     bool f = true;
     unsigned int count = 0;
     f = (game_output_.seq_.size() == needed_seq_.size());
+
     while (game_output_.seq_.size() != 0) {
         int e = game_output_.seq_.front();
         game_output_.seq_.pop_front();
@@ -488,6 +538,9 @@ void Core::Game::check() {
         }
         count++;
     }
+
+    // Check the game output == needed sequence
+
     if (f) {
         std::cout << "Success" << std::endl;
         Core::logMessage("Success! The output is same as needed.", 
@@ -501,15 +554,30 @@ void Core::Game::check() {
     }
 }
 
+/**
+ * @program:     Core::Game::runAll
+ * @description: This function is to run all commands from begin to end
+ */
 void Core::Game::runAll() {
     game_state_ = !error_state_;
+
+    // First set game state the negation of error state
+
     while (game_state_ && !error_state_) {
         game_robot_.runRefCommand();
         std::this_thread::sleep_for(std::chrono::seconds(game_gap_));
+
+        // pause to wait for the animation of robot
+
     }
     check();
 }
 
+/**
+ * @program:     Core::Game::runTo
+ * @description: This function is to run all commands from begin to the target referrence
+ * @param:       target_ref : The target refference of commands
+ */
 void Core::Game::runTo(int target_ref) {
     game_state_ = !error_state_;
     while (game_state_ && error_state_) {
@@ -518,10 +586,16 @@ void Core::Game::runTo(int target_ref) {
             game_state_ = false;
         }
         std::this_thread::sleep_for(std::chrono::seconds(game_gap_));
+
+        // pause to wait for the animation of robot
     }
     check();
 }
 
+/**
+ * @program:     Core::Game::restart
+ * @description: This function is to run all commands from begin to end **again**
+ */
 void Core::Game::restart() {
     game_state_ = true;
     error_state_ = false;

@@ -2,6 +2,8 @@
 #include "console.h"
 #include <ncurses.h>
 
+unsigned int Cli::GamePanel::kPauseTimes = 0;
+
 /** 
  * @program:     Cli::GamePanel::initScreen
  * @description: This function is to put the GameMainTitle and GameInfo to the console
@@ -46,16 +48,20 @@ void Cli::GamePanel::initScreen() {
     wrefresh(main_window_);
 }
 
+void Cli::GamePanel::showMain() {
+
+}
+
 /**
  * @program:     Cli::GamePanel::showPaused
  * @description: This function is to show the pause tab.
  */
 void Cli::GamePanel::showPaused() {
-    werase(main_window_);
-
     Core::logMessage("showPaused function clears the console content.", 
                      Core::LogLocation::kCli,
                      Core::LogType::kInfo);
+
+    werase(main_window_);
 
     int topleft_x = (kGameConsoleWidth - kGamePausedTitleWidth) / 2;
     int topleft_y = (kGameConsoleHeight - kGamePausedTitleHeight) / 2;
@@ -88,7 +94,11 @@ void Cli::GamePanel::run() {
 
         switch (ch) {
         case 'p' :
-            showPaused();
+            if (kPauseTimes % 2 == 0) {
+                showPaused();   // When kPauseTimes is even, we need to 
+            } else {
+                showMain();
+            }
             wrefresh(main_window_);
             break;
         }

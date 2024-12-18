@@ -45,7 +45,7 @@ class GamePanel {
         LR"*( Press `w` to write the commands to a new file.     )*",
         LR"*( Press `r` to restart the game.                     )*",
         LR"*( Press `d` to delete the target command and restart.)*",
-        LR"*( Press `q` to quit the game.)*",
+        LR"*( Press `q` to quit the game.                        )*",
         LR"*( Press **ANY KEY** to start the game...             )*"
     };
     constexpr static short kGameInfoWidth  = 53;
@@ -54,6 +54,12 @@ class GamePanel {
     constexpr static short kGameConsoleWidth = 140;
     constexpr static short kGameCenterX = kGameConsoleWidth / 2;
     constexpr static short kGameConsoleHeight = 30;
+
+    static unsigned int kPauseTimes;
+    
+    // Pause times is used to judge to show pause title or game panel
+    // When kPauseTimes is even, we need to show pause title
+    // When lPauseTimes is odd, we need to show game panel
 
     Core::Game* game_;
     WINDOW* main_window_;

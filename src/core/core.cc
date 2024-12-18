@@ -8,12 +8,14 @@
 //======================================================//
 
 #include "core.h"
-#include <iostream>
+
+#include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <algorithm>
 #include <thread>
 
 /**
@@ -27,9 +29,12 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-    std::stringstream ss;
+    std::stringstream ss, file_ss;
     ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H:%M:%S:") 
        << std::setw(3) << std::setfill('0') << ms.count();
+    
+    file_ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d-%H_%M_%S");
+    
 
     // Get the timestamp
 
@@ -42,8 +47,17 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     //                           Core::LogLocation::kCli  => "CLI"
     //                           Core::LogLocation::kGui  => "GUI"
 
+    std::ofstream log_file("logs/" + file_ss.str() + ".txt", std::ios::app);
+
     if (type == Core::LogType::kInfo) {
-        std::clog << "Info  ["
+        // std::clog << "Info  ["
+        //           << ss.str() 
+        //           << "] #("
+        //           << loc_str
+        //           << ") "
+        //           << message
+        //           << std::endl;
+        log_file << "Info  ["
                   << ss.str() 
                   << "] #("
                   << loc_str
@@ -51,7 +65,14 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
                   << message
                   << std::endl;
     } else if (type == Core::LogType::kError) {
-        std::clog << "Error ["
+        // std::clog << "Error ["
+        //           << ss.str() 
+        //           << "] #("
+        //           << loc_str
+        //           << ") "
+        //           << message
+        //           << std::endl;
+        log_file << "Error ["
                   << ss.str() 
                   << "] #("
                   << loc_str
@@ -59,6 +80,8 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
                   << message
                   << std::endl;
     }
+
+    log_file.close();
 }
 
 unsigned int Core::Command::kCmdCount = 0;              // Counts from 0

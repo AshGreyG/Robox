@@ -11,12 +11,32 @@
 
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <thread>
+
+
+/**
+ * @program:     Core::initLogFile
+ * @description: This function is to create `log` directory and the log file
+ */
+void Core::initLogFile() {
+    std::filesystem::create_directory(log);
+
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d_%H_%M_%S");
+
+    log_name = ss.str();
+
+    std::ofstream log_file(log / (log_name + ".log"));
+}
 
 /**
  * @program:     Core::logMessage
@@ -29,13 +49,10 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-    std::stringstream ss, file_ss;
+    std::stringstream ss;
     ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d %H:%M:%S:") 
        << std::setw(3) << std::setfill('0') << ms.count();
     
-    file_ss << std::put_time(std::localtime(&time_t_now), "%Y-%m-%d-%H_%M_%S");
-    
-
     // Get the timestamp
 
     std::string loc_str = (loc == Core::LogLocation::kCore) ? "CORE"
@@ -47,7 +64,8 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     //                           Core::LogLocation::kCli  => "CLI"
     //                           Core::LogLocation::kGui  => "GUI"
 
-    std::ofstream log_file("logs/" + file_ss.str() + ".txt", std::ios::app);
+
+    std::ofstream log_file(log / (log_name + ".log"), std::ios::app);
 
     if (type == Core::LogType::kInfo) {
         // std::clog << "Info  ["

@@ -1,10 +1,11 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <vector>
-#include <string>
 #include <array>
 #include <deque>
+#include <filesystem>
+#include <string>
+#include <vector>
 
 namespace Core {
 
@@ -20,6 +21,11 @@ enum LogLocation {
 };
 
 void logMessage(const std::string& message, LogLocation loc, LogType type);
+void initLogFile();
+
+constexpr static std::string log_directory = "log";
+const static std::filesystem::path log(log_directory);
+static std::string log_name;
 
 class Robot;
 class Game;
@@ -175,7 +181,7 @@ class Game {
     void check();
 
   public:
-    Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) {}
+    Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) { initLogFile(); }
 
     void initialize(std::vector<std::string>& a,
                     std::vector<int>& ps,

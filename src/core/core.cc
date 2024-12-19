@@ -68,35 +68,21 @@ void Core::logMessage(const std::string& message, Core::LogLocation loc, Core::L
     std::ofstream log_file(log / (log_name + ".log"), std::ios::app);
 
     if (type == Core::LogType::kInfo) {
-        // std::clog << "Info  ["
-        //           << ss.str() 
-        //           << "] #("
-        //           << loc_str
-        //           << ") "
-        //           << message
-        //           << std::endl;
         log_file << "Info  ["
-                  << ss.str() 
-                  << "] #("
-                  << loc_str
-                  << ") "
-                  << message
-                  << std::endl;
+                 << ss.str() 
+                 << "] #("
+                 << loc_str
+                 << ") "
+                 << message
+                 << std::endl;
     } else if (type == Core::LogType::kError) {
-        // std::clog << "Error ["
-        //           << ss.str() 
-        //           << "] #("
-        //           << loc_str
-        //           << ") "
-        //           << message
-        //           << std::endl;
         log_file << "Error ["
-                  << ss.str() 
-                  << "] #("
-                  << loc_str
-                  << ") "
-                  << message
-                  << std::endl;
+                 << ss.str() 
+                 << "] #("
+                 << loc_str
+                 << ") "
+                 << message
+                 << std::endl;
     }
 
     log_file.close();

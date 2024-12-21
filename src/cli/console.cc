@@ -3,7 +3,9 @@
 
 #include <ncurses.h>
 
+#include <cmath>
 #include <fstream>
+#include <string>
 
 unsigned int Cli::GamePanel::kPauseTimes = 0;
 
@@ -129,7 +131,7 @@ void Cli::GamePanel::showSelect() {
         unsigned int current_top_left_x = topleft_x + ((i - 1) % kMaxLevelOneLine) * (kGameSelectLevelWidth + 1);
         unsigned int current_top_left_y = topleft_y + ((i - 1) / kMaxLevelOneLine) * (kGameSelectLevelHeight + 1);
 
-        // 
+        // calculate the topleft corner coordinate of currently drawing level
 
         for (int j = 1; j <= 3; ++j) {
         mvwaddwstr(main_window_, 
@@ -138,7 +140,24 @@ void Cli::GamePanel::showSelect() {
                    kGameSelectLevel[j - 1]);
         }
 
-        
+        auto level_color = (i <= kCurrentLevel) ? COLOR_GREEN : COLOR_RED;
+
+        // if the drawing level player has completed, then use green, if not, use red
+
+        std::string level_str = std::to_string(i);
+        wchar_t* level_wchar = (wchar_t*)calloc(level_str.length(), sizeof(wchar_t));
+        for (int k = 1; k <= level_str.length(); ++k) {
+            level_wchar[k - 1] = wchar_t(level_str[k - 1]);
+        }
+
+        init_pair(1, level_color, COLOR_BLACK);
+
+        attron(COLOR_PAIR(1));
+        mvwaddwstr(main_window_,
+                   current_top_left_y + 1,
+                   current_top_left_x + kGameSelectLevelWidth / 2,
+                   level_wchar);
+
     }
 
     wrefresh(main_window_);
@@ -187,7 +206,16 @@ void Cli::GamePanel::run() {
     std::filesystem::create_directory(config);
     std::ifstream current_config_file(config / level_config_name);
 
-    current_config_file >> kCurrentLevel;
+    if (current_config_file.is_open()) {
+        Core::logMessage("File config/current.config has been loaded successfully", 
+                         Core::LogLocation::kCli, 
+                         Core::LogType::kInfo);
+        current_config_file >> kCurrentLevel;
+    } else {
+        Core::logMessage("Fail to load file config/current.config", 
+                         Core::LogLocation::kCli, 
+                         Core::LogType::kError);
+    }
 
     initScreen();
 

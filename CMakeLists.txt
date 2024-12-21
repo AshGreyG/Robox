@@ -16,7 +16,6 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Curses REQUIRED)
 
-
 set(PROJECT_SOURCES
         src/main.cpp
         src/gui/robox_main_window.h
@@ -91,6 +90,10 @@ set_target_properties(Robox PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+add_custom_command(TARGET Test-Console PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_SOURCE_DIR}/config/ $<TARGET_FILE_DIR:Test-Console>/config)
 
 target_compile_options(Test-Console PRIVATE ${CURSES_CFLAGS})
 target_link_libraries(Test-Console PRIVATE ${CURSES_LIBRARIES})

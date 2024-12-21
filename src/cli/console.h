@@ -2,9 +2,17 @@
 #define TERMINAL_H
 
 #include <core/core.h>
+
 #include <ncurses.h>
 
+#include <filesystem>
+#include <string>
+
 namespace Cli {
+
+constexpr static std::string config_directory = "config";
+constexpr static std::string level_config_name = "current.config";
+const static std::filesystem::path config(config_directory);
 
 class GamePanel {
   private:
@@ -50,22 +58,43 @@ class GamePanel {
     };
     constexpr static short kGameInfoWidth  = 53;
     constexpr static short kGameInfoHeight = 9;
+
+    constexpr static unsigned int kTotalLevel = 9;
+    constexpr static unsigned int kMaxLevelOneLine = 6;
+    constexpr static wchar_t kGameSelectLevel[3][15] = {
+      LR"*( +----------+ )*",
+      LR"*( |          | )*",
+      LR"*( +----------+ )*",
+    };
+    constexpr static short kGameSelectLevelWidth  = 15;
+    constexpr static short kGameSelectLevelHeight = 3;
+
+    constexpr static short kGameTargetWindowWidth  = 110;
+    constexpr static short kGameTargetWindowHeight = 3;
     
-    constexpr static short kGameConsoleWidth = 140;
-    constexpr static short kGameCenterX = kGameConsoleWidth / 2;
-    constexpr static short kGameConsoleHeight = 30;
+    constexpr static short kGameMainWindowWidth  = 110;
+    constexpr static short kGameMainWindowHeight = 30;
+
+    constexpr static short kGameCommandWindowWidth  = 20;
+    constexpr static short kGameCommandWindowHeight = 30;
 
     static unsigned int kPauseTimes;
+    unsigned int kCurrentLevel;
     
     // Pause times is used to judge to show pause title or game panel
     // When kPauseTimes is even, we need to show pause title
     // When lPauseTimes is odd, we need to show game panel
 
     Core::Game* game_;
+    WINDOW* target_window_;
     WINDOW* main_window_;
+    WINDOW* command_window_;
+    WINDOW* status_window_;
+
     char input_key_;
 
     void initScreen();
+    void showSelect();
     void showMain();
     void showPaused();
     void showHelp();

@@ -2,7 +2,7 @@
 // Copyright (c) 2024 AshGrey. All rights reserved.     //
 // Released under MIT license as described in the file  //
 // LICENSE.                                             //
-// Author: AshGrey (He Yuhui)                           //
+// Author: AshGrey (Grey He)                            //
 //                                                      //
 // This file is the implement of header file `core.h`   //
 //======================================================//
@@ -207,7 +207,7 @@ void Core::Game::initialize(std::vector<std::string>& a,
 bool Core::Command::checkOpindexSurplus() {
     if (list_[ref_ - 1].target_index_ != Core::Command::SingleCommand::kNullVacant) {
 
-        // Notice referrence begins from **1** !!!, only use this function in no-parameter
+        // Notice reference begins from **1** !!!, only use this function in no-parameter
         // command. If the no-parameter command has target index, then we need to error here
 
         game_->setGameState(false);
@@ -306,7 +306,7 @@ bool Core::Command::checkCmindexInvalid() {
     if (ref_ > list_.size()) {
         game_->setGameState(false);
         game_->setErrorState(true);
-        std::cout << "Error on instrcution " + std::to_string(ref_) << std::endl;
+        std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : This command jumps out of the end of command list.", 
                          Core::LogLocation::kCore, 
@@ -315,7 +315,7 @@ bool Core::Command::checkCmindexInvalid() {
     } else if (ref_ <= 0) {
         game_->setGameState(false);
         game_->setErrorState(true);
-        std::cout << "Error on instrcution " + std::to_string(ref_) << std::endl;
+        std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
         Core::logMessage("Command ID " + std::to_string(ref_) +
                          " : This command jumps out of the begin of command list.", 
                          Core::LogLocation::kCore, 
@@ -363,7 +363,7 @@ bool Core::Command::checkVacantEmpty() {
 
 /**
  * @program:     Core::Command::runRefCommand
- * @description: This function is to run the referrence command
+ * @description: This function is to run the reference command
  */
 void Core::Command::runRefCommand() {
     if (ref_ == list_.size() + 1) {
@@ -433,7 +433,7 @@ void Core::Command::runRefCommand() {
         owner_->setValue(owner_->getValue() + vacant_->seq_[list_[ref_ - 1].target_index_]);
         //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         //                 Handbox Value                      Target Vacant Value
-        //                                    Notice command referrence begins from **1**
+        //                                    Notice command reference begins from **1**
         //                                    Vacant index begins from **0**
 
         Core::logMessage("Command ID " + std::to_string(ref_) +
@@ -459,7 +459,7 @@ void Core::Command::runRefCommand() {
         owner_->setValue(owner_->getValue() - vacant_->seq_[list_[ref_ - 1].target_index_]);
         //               ^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         //                 Handbox Value                    Target Vacant Value
-        //                                    Notice command referrence begins from **1**
+        //                                    Notice command reference begins from **1**
         //                                    Vacant index begins from **0**
 
         Core::logMessage("Command ID " + std::to_string(ref_) +
@@ -602,8 +602,8 @@ void Core::Game::runAll() {
 
 /**
  * @program:     Core::Game::runTo
- * @description: This function is to run all commands from begin to the target referrence
- * @param:       target_ref : The target refference of commands
+ * @description: This function is to run all commands from begin to the target reference
+ * @param:       target_ref : The target reference of commands
  */
 void Core::Game::runTo(int target_ref) {
     game_state_ = !error_state_;

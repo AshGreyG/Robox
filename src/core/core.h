@@ -68,7 +68,7 @@ class Output {
  */
 class Vacant {
   public:
-    std::vector<bool> seq_empty_; // Should set defaultly true, means empty
+    std::vector<bool> seq_empty_; // Should set default true, means empty
     std::vector<int> seq_;
 };
 
@@ -108,7 +108,7 @@ class Command {
   private:
     
     std::vector<SingleCommand> list_; // A list of all command
-    unsigned int ref_ = 1;            // Referrence to the command which is executed now
+    unsigned int ref_ = 1;            // Reference to the command which is executed now
 
     Game* game_;
     Robot* owner_;
@@ -199,6 +199,7 @@ class Game {
     void runAll();
     void runTo(int target_ref);
     void pause() { game_state_ = false; }
+    void start() { game_state_ = true; }
     void restart();
 };
 

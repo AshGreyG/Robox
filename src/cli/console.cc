@@ -29,12 +29,12 @@ void Cli::GamePanel::initScreen() {
 
     main_window_ = newwin(kGameMainWindowHeight, 
                           kGameMainWindowWidth, 
-                          3, 
+                          kGameTargetWindowHeight, 
                           0);
 
     box(main_window_, 0, 0);
 
-    Core::logMessage("The game MainWindow panel has been initalized.", 
+    Core::logMessage("The game MainWindow panel has been initialized.", 
                      Core::LogLocation::kCli, 
                      Core::LogType::kInfo);
 
@@ -45,10 +45,20 @@ void Cli::GamePanel::initScreen() {
 
     box(command_window_, 0, 0);
 
-    Core::logMessage("The game CommandWindow panel has been initalized.", 
+    Core::logMessage("The game CommandWindow panel has been initialized.", 
                      Core::LogLocation::kCli, 
                      Core::LogType::kInfo);
 
+    status_window_ = newwin(kGameStatusWindowHeight,
+                            kGameStatusWindowWidth,
+                            kGameTargetWindowHeight + kGameMainWindowHeight,
+                            0);
+
+    box(status_window_, 0, 0);
+
+    Core::logMessage("The game StatusWindow panel has been initialized.", 
+                     Core::LogLocation::kCli, 
+                     Core::LogType::kInfo);
 
     int topleft_x = (kGameMainWindowWidth - kGameMainTitleWidth) / 2;
     int topleft_y = (kGameMainWindowHeight - (kGameMainTitleHeight + kGameInfoHeight + 1)) / 2;
@@ -77,10 +87,11 @@ void Cli::GamePanel::initScreen() {
     wrefresh(target_window_);
     wrefresh(main_window_);
     wrefresh(command_window_);
+    wrefresh(status_window_);
 }
 
 /**
- * @program:
+ * @program:     Cli::GamePanel::showSelect
  * @description: This function is to show the select level panel
  */
 void Cli::GamePanel::showSelect() {
@@ -133,35 +144,41 @@ void Cli::GamePanel::showSelect() {
 
         // calculate the topleft corner coordinate of currently drawing level
 
-        for (int j = 1; j <= 3; ++j) {
+        for (int j = 1; j <= kGameSelectLevelHeight; ++j) {
         mvwaddwstr(main_window_, 
                    current_top_left_y + j - 1, 
                    current_top_left_x,
                    kGameSelectLevel[j - 1]);
         }
 
-        auto level_color = (i <= kCurrentLevel) ? COLOR_GREEN : COLOR_RED;
+        wchar_t is_level_completed = (i <= kCurrentLevel) ? kCompleted : kUncompleted; 
 
-        // if the drawing level player has completed, then use green, if not, use red
+        // if the level drawing now player has completed, then use '@' to wrap it, if not, use 'X'
 
-        std::string level_str = std::to_string(i);
-        wchar_t* level_wchar = (wchar_t*)calloc(level_str.length(), sizeof(wchar_t));
-        for (int k = 1; k <= level_str.length(); ++k) {
-            level_wchar[k - 1] = wchar_t(level_str[k - 1]);
-        }
+        std::wstring level_str = std::wstring(1, is_level_completed)
+                               + L" "
+                               + std::to_wstring(i)
+                               + L" "
+                               + std::wstring(1, is_level_completed);
 
-        init_pair(1, level_color, COLOR_BLACK);
+        wchar_t* level_wchar = level_str.data();
 
-        attron(COLOR_PAIR(1));
         mvwaddwstr(main_window_,
                    current_top_left_y + 1,
-                   current_top_left_x + kGameSelectLevelWidth / 2,
+                   current_top_left_x + kGameSelectLevelWidth / 2 - level_str.length() / 2,
                    level_wchar);
 
+        Core::logMessage("level panel " + std::to_string(i) + 
+                         " has been drawn successfully, it's " +
+                         ((is_level_completed == kCompleted) ? "completed" : "uncompleted") + ".", 
+                         Core::LogLocation::kCli, 
+                         Core::LogType::kInfo);
     }
 
+
+
     wrefresh(main_window_);
- 
+
 }
 
 /**
@@ -169,7 +186,7 @@ void Cli::GamePanel::showSelect() {
  * @description: This function is to show the 
  */
 void Cli::GamePanel::showMain() {
-
+    
 }
 
 /**
@@ -199,18 +216,18 @@ void Cli::GamePanel::showPaused() {
     Core::logMessage("The paused title has been initialized", 
                      Core::LogLocation::kCli, 
                      Core::LogType::kInfo);
-
 }
 
 void Cli::GamePanel::run() {
     std::filesystem::create_directory(config);
-    std::ifstream current_config_file(config / level_config_name);
+    std::ifstream current_config_file(config / kCurentConfigFile);
 
     if (current_config_file.is_open()) {
-        Core::logMessage("File config/current.config has been loaded successfully", 
+        current_config_file >> kCurrentLevel;
+        Core::logMessage("File config/current.config has been loaded successfully. "
+                         "And the current level is " + std::to_string(kCurrentLevel), 
                          Core::LogLocation::kCli, 
                          Core::LogType::kInfo);
-        current_config_file >> kCurrentLevel;
     } else {
         Core::logMessage("Fail to load file config/current.config", 
                          Core::LogLocation::kCli, 
@@ -243,6 +260,10 @@ void Cli::GamePanel::run() {
             break;
         }
     }
+
+    Core::logMessage("Player press q to quit.", 
+                     Core::LogLocation::kCli, 
+                     Core::LogType::kInfo);
 
     endwin();
 }

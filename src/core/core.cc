@@ -179,7 +179,7 @@ void Core::Game::initialize(std::vector<std::string>& a,
 
             std::cout << "Error on instruction " + std::to_string(it - cmd.begin() + 1) << std::endl;
             Core::logMessage("Command ID " + std::to_string(it - cmd.begin() + 1) + 
-                             " : Unkown command `" + name + "`, please "
+                             " : Unknown command `" + name + "`, please "
                              "check the available command list by typing "
                              "key `?`.", 
                              Core::LogLocation::kCore, 

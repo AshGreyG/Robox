@@ -10,9 +10,11 @@
 
 namespace Cli {
 
-constexpr static std::string config_directory = "config";
-constexpr static std::string level_config_name = "current.config";
-const static std::filesystem::path config(config_directory);
+constexpr static std::string kConfigDirectory = "config";
+constexpr static std::string kCurentConfigFile = "current.config";
+constexpr static std::string kLevelFileLeft = "level-";
+constexpr static std::string kLevelFileRight = ".config";
+const static std::filesystem::path config(kConfigDirectory);
 
 class GamePanel {
   private:
@@ -59,7 +61,7 @@ class GamePanel {
     constexpr static short kGameInfoWidth  = 53;
     constexpr static short kGameInfoHeight = 9;
 
-    constexpr static unsigned int kTotalLevel = 9;
+    constexpr static unsigned int kTotalLevel = 4;
     constexpr static unsigned int kMaxLevelOneLine = 6;
     constexpr static wchar_t kGameSelectLevel[3][15] = {
       LR"*( +----------+ )*",
@@ -69,27 +71,46 @@ class GamePanel {
     constexpr static short kGameSelectLevelWidth  = 15;
     constexpr static short kGameSelectLevelHeight = 3;
 
+    // kGameSelectLevel* are the properties of kGameSelect when the showSelect()
+    // function is executed
+
     constexpr static short kGameTargetWindowWidth  = 110;
-    constexpr static short kGameTargetWindowHeight = 3;
+    constexpr static short kGameTargetWindowHeight = 4;
+
+    // kGameTargetWindow* are the properties of target_window_
     
     constexpr static short kGameMainWindowWidth  = 110;
-    constexpr static short kGameMainWindowHeight = 30;
+    constexpr static short kGameMainWindowHeight = 26;
+
+    // kGameMainWindow* are the properties of main_window_
 
     constexpr static short kGameCommandWindowWidth  = 20;
-    constexpr static short kGameCommandWindowHeight = 30;
+    constexpr static short kGameCommandWindowHeight = 33;
+
+    // kGameCommandWindow* are the properties of command_window_
+
+    constexpr static short kGameStatusWindowWidth  = 110;
+    constexpr static short kGameStatusWindowHeight = 3;
+
+    constexpr static wchar_t kCompleted = '@';
+    constexpr static wchar_t kUncompleted = 'X';
+
+    // kCompleted and kUncompleted are the signal characters to show
+    // is the level completed
 
     static unsigned int kPauseTimes;
-    unsigned int kCurrentLevel;
     
     // Pause times is used to judge to show pause title or game panel
     // When kPauseTimes is even, we need to show pause title
     // When lPauseTimes is odd, we need to show game panel
 
+    unsigned int kCurrentLevel;
+
     Core::Game* game_;
-    WINDOW* target_window_;
-    WINDOW* main_window_;
-    WINDOW* command_window_;
-    WINDOW* status_window_;
+    WINDOW* target_window_;   // show the game target
+    WINDOW* main_window_;     // show the game panel
+    WINDOW* command_window_;  // show the player command
+    WINDOW* status_window_;   // show the game status
 
     char input_key_;
 

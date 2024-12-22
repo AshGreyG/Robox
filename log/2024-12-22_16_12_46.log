@@ -1,8 +1,0 @@
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Command` to class `Core::Command::SingleCommand`.
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Robot` to class `Core::Command`.
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Command` to class `Core::Command::SingleCommand`.
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Robot` to class `Core::Command`.
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Command` to class `Core::Command::SingleCommand`.
-Info  [2024-12-22 16:12:46:370] #(CORE) Pass command name and operated index of vacant from class `Core::Robot` to class `Core::Command`.
-Error [2024-12-22 16:12:46:370] #(CORE) Command ID 4 : Unknown command `outnox`, please check the available command list by typing key `?`.
-Info  [2024-12-22 16:12:52:758] #(CLI) File config/current.config has been loaded successfully. And the current level is 2

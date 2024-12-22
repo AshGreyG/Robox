@@ -106,6 +106,10 @@ class GamePanel {
 
     unsigned int kCurrentLevel;
 
+    // kCurrentLevel is the max level that player has completed
+
+    static unsigned int kCurrentCommandRow;
+
     Core::Game* game_;
     WINDOW* target_window_;   // show the game target
     WINDOW* main_window_;     // show the game panel
@@ -114,6 +118,7 @@ class GamePanel {
 
     char input_key_;
 
+    std::wstring getInputLevel();
     void initScreen();
     void showSelect();
     void showMain();

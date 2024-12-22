@@ -2,12 +2,58 @@
 #include "console.h"
 
 #include <ncurses.h>
+#include <iconv.h>
 
 #include <cmath>
 #include <fstream>
 #include <string>
 
 unsigned int Cli::GamePanel::kPauseTimes = 0;
+unsigned int Cli::GamePanel::kCurrentCommandRow = 1;
+
+/**
+ * @program:
+ * @description: This function is to get the input string (not just a character)
+ */
+std::wstring Cli::GamePanel::getInputLevel() {
+    std::string input_str = "";     // This is the std::string version of input string, to show in the logging file
+    wchar_t* input_str_wchar = (wchar_t*)calloc(std::to_string(kCurrentLevel).length(), sizeof(wchar_t));
+    wchar_t input_character;
+    unsigned int current_command_column = 1;
+
+    while ((input_character = mvwgetch(command_window_, kCurrentCommandRow, current_command_column)) != '\n' ) {
+            
+        // When player enters the 'ENTER' key, the input ends
+        // and when player enters more than the string length of current level, it should notice player
+
+        mvwaddwstr(status_window_, 1, 1, L"Please enter the level number...");
+        wrefresh(status_window_);
+
+        if (current_command_column <= std::to_string(kCurrentLevel).length()) {
+            input_str_wchar[current_command_column - 1]  = input_character;
+            mvwaddwstr(command_window_, kCurrentCommandRow, 1, input_str_wchar);
+            wrefresh(command_window_);
+            input_str += std::string(1, char(input_character));
+            current_command_column++;
+        } else {
+            werase(status_window_);
+            box(status_window_, 0, 0);
+            mvwaddwstr(status_window_, 1, 1, 
+                       L"Your input is over the length of max input, please press the 'ENTER' key.");
+            wrefresh(status_window_);
+        }
+    }
+
+    std::wstring input_wstr(input_str_wchar);
+
+    Core::logMessage("Input string is " + 
+                     input_str + 
+                     " (notice that the logging string is std::string, but the input is std::wstring).", 
+                     Core::LogLocation::kCli, 
+                     Core::LogType::kInfo);
+
+    return input_wstr;
+}
 
 /** 
  * @program:     Cli::GamePanel::initScreen
@@ -175,10 +221,9 @@ void Cli::GamePanel::showSelect() {
                          Core::LogType::kInfo);
     }
 
-
-
     wrefresh(main_window_);
 
+    std::wstring input_level = getInputLevel();
 }
 
 /**

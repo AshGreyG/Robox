@@ -5,6 +5,7 @@
 #include <iconv.h>
 
 #include <cmath>
+#include <cwchar>
 #include <fstream>
 #include <string>
 
@@ -12,7 +13,7 @@ unsigned int Cli::GamePanel::kPauseTimes = 0;
 unsigned int Cli::GamePanel::kCurrentCommandRow = 1;
 
 /**
- * @program:
+ * @program:     Cli::GamePanel::getInputLevel
  * @description: This function is to get the input string (not just a character)
  */
 std::wstring Cli::GamePanel::getInputLevel() {
@@ -20,12 +21,20 @@ std::wstring Cli::GamePanel::getInputLevel() {
     wchar_t* input_str_wchar = (wchar_t*)calloc(std::to_string(kCurrentLevel).length(), sizeof(wchar_t));
     wchar_t input_character;
     unsigned int current_command_column = 1;
+    
+    werase(status_window_);
+    mvwaddwstr(status_window_, 1, 1, L"Please enter the level number...");
+    wrefresh(status_window_);
+
+    // show at the first time, otherwise when player enters the select panel,
+    // there is no info to notice them.
 
     while ((input_character = mvwgetch(command_window_, kCurrentCommandRow, current_command_column)) != '\n' ) {
             
         // When player enters the 'ENTER' key, the input ends
         // and when player enters more than the string length of current level, it should notice player
 
+        werase(status_window_);
         mvwaddwstr(status_window_, 1, 1, L"Please enter the level number...");
         wrefresh(status_window_);
 
@@ -35,12 +44,22 @@ std::wstring Cli::GamePanel::getInputLevel() {
             wrefresh(command_window_);
             input_str += std::string(1, char(input_character));
             current_command_column++;
+
+            Core::logMessage("Player enters the character " +
+                             std::string(1, char(input_character)), 
+                             Core::LogLocation::kCli, 
+                             Core::LogType::kInfo);
         } else {
             werase(status_window_);
             box(status_window_, 0, 0);
             mvwaddwstr(status_window_, 1, 1, 
                        L"Your input is over the length of max input, please press the 'ENTER' key.");
             wrefresh(status_window_);
+
+            Core::logMessage("Player has already entered the string which has same length with the current level, "
+                             "we need to inform them to enter the 'ENTER' key",
+                             Core::LogLocation::kCli, 
+                             Core::LogType::kInfo);
         }
     }
 
@@ -184,6 +203,8 @@ void Cli::GamePanel::showSelect() {
                      Core::LogLocation::kCli, 
                      Core::LogType::kInfo);
 
+    // draw the select panel
+
     for (int i = 1; i <= kTotalLevel; ++i) {
         unsigned int current_top_left_x = topleft_x + ((i - 1) % kMaxLevelOneLine) * (kGameSelectLevelWidth + 1);
         unsigned int current_top_left_y = topleft_y + ((i - 1) / kMaxLevelOneLine) * (kGameSelectLevelHeight + 1);
@@ -220,10 +241,47 @@ void Cli::GamePanel::showSelect() {
                          Core::LogLocation::kCli, 
                          Core::LogType::kInfo);
     }
-
     wrefresh(main_window_);
 
-    std::wstring input_level = getInputLevel();
+    std::wstring input_level_str = getInputLevel();
+    
+    while (input_level_str > std::to_wstring(kCurrentLevel)) {
+
+        // means that the input is illegal, should wait for the legal input
+
+        if (input_level_str >= std::to_wstring(kTotalLevel)) {
+            wchar_t error_template_1[] = L"There is no level ";
+            wchar_t* error_1 = (wchar_t*)calloc(input_level_str.length() + sizeof(error_template_1) / sizeof(wchar_t) + 3, 
+                                                sizeof(wchar_t));
+            std::wcscpy(error_1, error_template_1);
+            std::wcscat(error_1, input_level_str.data());
+            mvwaddwstr(status_window_, 1, 1, error_1);
+
+            // use the C-style function to adjust to the ncurses function...
+
+            Core::logMessage("Player's input is greater than the total level.", 
+                             Core::LogLocation::kCli, 
+                             Core::LogType::kInfo);
+        } else {
+            wchar_t error_template_2[] = L"You haven't unlocked level ";
+            wchar_t* error_2 = (wchar_t*)calloc(input_level_str.length() + sizeof(error_template_2) / sizeof(wchar_t) + 3,
+                                                sizeof(wchar_t));
+            std::wcscpy(error_2, error_template_2);
+            std::wcscat(error_2, input_level_str.data());
+            mvwaddwstr(status_window_, 1, 1, L"You haven't unlocked level ");
+
+            // use the C-style function to adjust to the ncurses function again...
+
+            Core::logMessage("Player's input is greater than the max locked level.", 
+                             Core::LogLocation::kCli, 
+                             Core::LogType::kInfo);
+        }
+
+        std::wstring input_level_str = getInputLevel();
+
+        // We need to get new input, otherwise this while loop will repeat many times in short time.
+        // The log file will get very large.
+    }
 }
 
 /**

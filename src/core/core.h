@@ -20,7 +20,12 @@ enum LogLocation {
     kGui
 };
 
-void logMessage(const std::string& message, LogLocation loc, LogType type);
+void logMessage(
+    const std::string& message, 
+    LogLocation loc, 
+    LogType type
+);
+
 void initLogFile();
 
 constexpr static std::string log_directory = "log";
@@ -183,11 +188,13 @@ class Game {
   public:
     Game() : game_robot_(this, &game_input_, &game_output_, &game_vacant_) { initLogFile(); }
 
-    void initialize(std::vector<std::string>& a,
-                    std::vector<int>& ps,
-                    std::vector<int>& ns,
-                    std::vector<std::pair<std::string, int>>& cmd,
-                    int vs);
+    void initialize(
+        std::vector<std::string>& a,
+        std::vector<int>& ps,
+        std::vector<int>& ns,
+        std::vector<std::pair<std::string, int>>& cmd,
+        int vs
+    );
 
     bool getGameState() { return game_state_; }
     void setGameState(bool s) { game_state_ = s; }

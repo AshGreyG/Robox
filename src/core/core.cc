@@ -104,11 +104,13 @@ std::array<std::string, 8> Core::Command::kAllCmd = {
 void Core::Command::appendToList(const std::string& name, int index) {
     kCmdCount++;
     list_.emplace_back(name, index);
-    Core::logMessage("Pass command name and operated index of "
-                     "vacant from class `Core::Command` to class "
-                     "`Core::Command::SingleCommand`.",
-                     Core::LogLocation::kCore,
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "Pass command name and operated index of "
+        "vacant from class `Core::Command` to class "
+        "`Core::Command::SingleCommand`.",
+        Core::LogLocation::kCore,
+        Core::LogType::kInfo
+    );
 }
 
 /**
@@ -119,11 +121,13 @@ void Core::Command::appendToList(const std::string& name, int index) {
  */
 void Core::Robot::initCommandList(const std::string& name, int index) {
     cmd_.appendToList(name, index);
-    Core::logMessage("Pass command name and operated index of "
-                     "vacant from class `Core::Robot` to class "
-                     "`Core::Command`.", 
-                     Core::LogLocation::kCore, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "Pass command name and operated index of "
+        "vacant from class `Core::Robot` to class "
+        "`Core::Command`.", 
+        Core::LogLocation::kCore, 
+        Core::LogType::kInfo
+    );
 }
 
 /**
@@ -136,11 +140,13 @@ void Core::Robot::initCommandList(const std::string& name, int index) {
  * @cmd:         Commands, they are the pair of command name and vacant index (default kNullVacant)
  * @vs:          The size of vacant
  */
-void Core::Game::initialize(std::vector<std::string>& a,
-                            std::vector<int>& ps,
-                            std::vector<int>& ns,
-                            std::vector<std::pair<std::string, int>>& cmd,
-                            int vs) {
+void Core::Game::initialize(
+    std::vector<std::string>& a,
+    std::vector<int>& ps,
+    std::vector<int>& ns,
+    std::vector<std::pair<std::string, int>>& cmd,
+    int vs
+) {
     vac_size_ = vs;                                 // pass the size of vacant
     for (int i = 1; i <= vs; ++i) {
         game_vacant_.seq_.push_back(0);             // Default num is 0
@@ -152,14 +158,20 @@ void Core::Game::initialize(std::vector<std::string>& a,
     needed_seq_ = std::move(ns);                    // Pass the needed sequence to the private member
 
     for (const auto& str : available_cmd_) {
-        if (std::find(Core::Command::kAllCmd.begin(), Core::Command::kAllCmd.end(), str) == Core::Command::kAllCmd.end()) {
+        if (std::find(
+                Core::Command::kAllCmd.begin(), 
+                Core::Command::kAllCmd.end(), str
+            ) == Core::Command::kAllCmd.end()
+        ) {
 
             // This condition means the str is illegal, so we need error here and return
 
-            Core::logMessage("Unknown command `" + str + "`, please check "
-                             "the entire supported command list by typing key `?`.", 
-                             Core::LogLocation::kCore, 
-                             Core::LogType::kError);
+            Core::logMessage(
+                "Unknown command `" + str + "`, please check "
+                "the entire supported command list by typing key `?`.", 
+                Core::LogLocation::kCore, 
+                Core::LogType::kError
+            );
             game_state_ = false;
             error_state_ = true;
             return;
@@ -172,18 +184,24 @@ void Core::Game::initialize(std::vector<std::string>& a,
 
     for (auto it = cmd.begin(); it < cmd.end(); ++it) {
         auto& [name, index] = *it;
-        if (std::find(available_cmd_.begin(), available_cmd_.end(), name) == available_cmd_.end()) {
+        if (std::find(
+                available_cmd_.begin(), 
+                available_cmd_.end(), name
+            ) == available_cmd_.end()
+        ) {
 
             // This condition means the command name is not in the available commands, 
             // so we need error here and return
 
             std::cout << "Error on instruction " + std::to_string(it - cmd.begin() + 1) << std::endl;
-            Core::logMessage("Command ID " + std::to_string(it - cmd.begin() + 1) + 
-                             " : Unknown command `" + name + "`, please "
-                             "check the available command list by typing "
-                             "key `?`.", 
-                             Core::LogLocation::kCore, 
-                             Core::LogType::kError);
+            Core::logMessage(
+                "Command ID " + std::to_string(it - cmd.begin() + 1) + 
+                " : Unknown command `" + name + "`, please "
+                "check the available command list by typing "
+                "key `?`.", 
+                Core::LogLocation::kCore, 
+                Core::LogType::kError
+            );
             game_state_ = false;
             error_state_ = true;
             return;
@@ -191,12 +209,14 @@ void Core::Game::initialize(std::vector<std::string>& a,
         game_robot_.initCommandList(name, index);
     }
 
-    Core::logMessage("Initialize the following variable : `Core::"
-                     "Game::[vac_size_ | game_vacant_ | available_"
-                     "cmd_ | provided_seq_ | needed_seq_ | game_input_ | "
-                     "game_robot_ ]`", 
-                     Core::LogLocation::kCore, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "Initialize the following variable : `Core::"
+        "Game::[vac_size_ | game_vacant_ | available_"
+        "cmd_ | provided_seq_ | needed_seq_ | game_input_ | "
+        "game_robot_ ]`", 
+        Core::LogLocation::kCore, 
+        Core::LogType::kInfo
+    );
 }
 
 /**
@@ -213,12 +233,14 @@ bool Core::Command::checkOpindexSurplus() {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Surplus operated vacant index, the "
-                         "command `" + list_[ref_ - 1].cmd_name_ + "` doesn't need an operated "
-                         "vacant index.", 
-                         Core::LogLocation::kCore,
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Surplus operated vacant index, the "
+            "command `" + list_[ref_ - 1].cmd_name_ + "` doesn't need an operated "
+            "vacant index.", 
+            Core::LogLocation::kCore,
+            Core::LogType::kError
+        );
         return true;
     } else {
         return false;
@@ -239,13 +261,14 @@ bool Core::Command::checkOpindexInvalid() {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Invalid operated vacant index, index (" +
-                         std::to_string(list_[ref_ - 1].target_index_) + 
-                         ") is greater than or equal to vacant size (" +
-                         std::to_string(vacant_->seq_.size()) + ".", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Invalid operated vacant index, index (" +
+            std::to_string(list_[ref_ - 1].target_index_) + 
+            ") is greater than or equal to vacant size (" +
+            std::to_string(vacant_->seq_.size()) + ".", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError);
         return true;
     } else if (list_[ref_ - 1].target_index_ < 0) {
 
@@ -254,12 +277,14 @@ bool Core::Command::checkOpindexInvalid() {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Invalid operated vacant index, index (" +
-                         std::to_string(list_[ref_ - 1].target_index_) + 
-                         ") is less than 0.",
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Invalid operated vacant index, index (" +
+            std::to_string(list_[ref_ - 1].target_index_) + 
+            ") is less than 0.",
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;
     } else if ((list_[ref_ - 1].cmd_name_ == "add"
              || list_[ref_ - 1].cmd_name_ == "sub"
@@ -271,10 +296,12 @@ bool Core::Command::checkOpindexInvalid() {
 
         game_->setGameState(false);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : The operated vacant doesn't store any box.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : The operated vacant doesn't store any box.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;
     } else {
         return false;
@@ -291,11 +318,13 @@ bool Core::Command::checkHandboxEmpty() {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot doesn't take any box, but the command "
-                         "`" + list_[ref_ - 1].cmd_name_ + "` means put the handbox down.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot doesn't take any box, but the command "
+            "`" + list_[ref_ - 1].cmd_name_ + "` means put the handbox down.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;
     } else {
         return false;
@@ -307,19 +336,23 @@ bool Core::Command::checkCmindexInvalid() {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : This command jumps out of the end of command list.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : This command jumps out of the end of command list.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;
     } else if (ref_ <= 0) {
         game_->setGameState(false);
         game_->setErrorState(true);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : This command jumps out of the begin of command list.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : This command jumps out of the begin of command list.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;
     } else {
         return false;
@@ -333,9 +366,11 @@ bool Core::Command::checkCmindexInvalid() {
 bool Core::Command::checkInputEmpty() {
     if (input_->seq_.size() == 0) {
         game_->setGameState(false);
-        Core::logMessage("Input has been empty. Now check the game state.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Input has been empty. Now check the game state.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         return true;
     } else {
         return false;
@@ -351,10 +386,12 @@ bool Core::Command::checkVacantEmpty() {
         game_->setErrorState(true);
         game_->setGameState(false);
         std::cout << "Error on instruction " + std::to_string(ref_) << std::endl;
-        Core::logMessage("Command ID " + std::to_string(ref_) + 
-                         " : This command needs the target vacant not empty.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) + 
+            " : This command needs the target vacant not empty.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kError
+        );
         return true;    // Empty
     } else {
         return false;   // Not empty
@@ -371,13 +408,19 @@ void Core::Command::runRefCommand() {
         // All the commands have been executed, so we set the game state false
 
         game_->setGameState(false);
-        Core::logMessage("All command has been executed.",
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "All command has been executed.",
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         return;
     }
     
-    int index = std::find(kAllCmd.begin(), kAllCmd.end(), list_[ref_ - 1].cmd_name_) - kAllCmd.begin();
+    int index = std::find(
+        kAllCmd.begin(), 
+        kAllCmd.end(), 
+        list_[ref_ - 1].cmd_name_
+    ) - kAllCmd.begin();
 
     // Get the index of this command
 
@@ -394,11 +437,13 @@ void Core::Command::runRefCommand() {
         owner_->setValue(input_->seq_.front());
         owner_->setState(false);
         input_->seq_.pop_front();
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot takes the box (value : " + 
-                         std::to_string(owner_->getValue()) + ") from the input.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot takes the box (value : " + 
+            std::to_string(owner_->getValue()) + ") from the input.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 1 : // "outbox"
@@ -413,12 +458,14 @@ void Core::Command::runRefCommand() {
         output_->seq_.push_back(owner_->getValue());    // Put the box to output
         owner_->setValue(Core::Robot::kEmptyHandbox);   // Robot doesn't hold this box anymore
         owner_->setState(true);
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot puts the handbox (value : " +
-                         std::to_string(output_->seq_.back()) +
-                         ") down on the output.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot puts the handbox (value : " +
+            std::to_string(output_->seq_.back()) +
+            ") down on the output.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 2 : // "add"
@@ -436,15 +483,17 @@ void Core::Command::runRefCommand() {
         //                                    Notice command reference begins from **1**
         //                                    Vacant index begins from **0**
 
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot adds the number (" + 
-                         std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
-                         ") of operated vacant index (" + 
-                         std::to_string(list_[ref_ - 1].target_index_) +
-                         "), and the handbox becomes " +
-                         std::to_string(owner_->getValue()), 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot adds the number (" + 
+            std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
+            ") of operated vacant index (" + 
+            std::to_string(list_[ref_ - 1].target_index_) +
+            "), and the handbox becomes " +
+            std::to_string(owner_->getValue()), 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 3 : // "sub"
@@ -462,15 +511,17 @@ void Core::Command::runRefCommand() {
         //                                    Notice command reference begins from **1**
         //                                    Vacant index begins from **0**
 
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot subs the number (" +
-                         std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
-                         ") of operated vacant index (" + 
-                         std::to_string(list_[ref_ - 1].target_index_) +
-                         "), and the handbox becomes " +
-                         std::to_string(owner_->getValue()), 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot subs the number (" +
+            std::to_string(vacant_->seq_[list_[ref_ - 1].target_index_]) +
+            ") of operated vacant index (" + 
+            std::to_string(list_[ref_ - 1].target_index_) +
+            "), and the handbox becomes " +
+            std::to_string(owner_->getValue()), 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 4 : // "copyto"
@@ -484,11 +535,13 @@ void Core::Command::runRefCommand() {
 
         vacant_->seq_[list_[ref_ - 1].target_index_] = owner_->getValue();  // Put the box to the vacant
         vacant_->seq_empty_[list_[ref_ - 1].target_index_] = false;         // Set the vacant state to not-empty
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot copy its handbox to the number of operated vacant index (" +
-                         std::to_string(list_[ref_ - 1].target_index_) + ").", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot copy its handbox to the number of operated vacant index (" +
+            std::to_string(list_[ref_ - 1].target_index_) + ").", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 5 : // "copyfrom"
@@ -501,13 +554,15 @@ void Core::Command::runRefCommand() {
         // Check if the vacant is empty
 
         owner_->setValue(vacant_->seq_[list_[ref_ - 1].target_index_ - 1]);
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot copy from the number of operated vacant index (" +
-                         std::to_string(list_[ref_ - 1].target_index_) +
-                         ") to its handbox, now the handbox is "
-                         + std::to_string(owner_->getValue()), 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot copy from the number of operated vacant index (" +
+            std::to_string(list_[ref_ - 1].target_index_) +
+            ") to its handbox, now the handbox is " +
+            std::to_string(owner_->getValue()), 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_++;
         break;
     case 6 : // jump
@@ -515,11 +570,13 @@ void Core::Command::runRefCommand() {
         
         // Check if there is the target command ID
 
-        Core::logMessage("Command ID " + std::to_string(ref_) +
-                         " : Robot's current command jumps to the index " +
-                         std::to_string(list_[ref_ - 1].target_index_) + " command", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Command ID " + std::to_string(ref_) +
+            " : Robot's current command jumps to the index " +
+            std::to_string(list_[ref_ - 1].target_index_) + " command", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
         ref_ = list_[ref_ - 1].target_index_; 
         break;
     case 7 : // jumpifzero
@@ -533,11 +590,13 @@ void Core::Command::runRefCommand() {
             // Check if there is the target command ID
 
             ref_ = list_[ref_ - 1].target_index_;
-            Core::logMessage("Command ID " + std::to_string(ref_) +
-                             " : Robot's current command jumps to the index " +
-                             std::to_string(ref_) + " command, because handbox is 0.", 
-                             Core::LogLocation::kCore, 
-                             Core::LogType::kInfo);
+            Core::logMessage(
+                "Command ID " + std::to_string(ref_) +
+                " : Robot's current command jumps to the index " +
+                std::to_string(ref_) + " command, because handbox is 0.", 
+                Core::LogLocation::kCore, 
+                Core::LogType::kInfo
+            );
         } else {
             ref_++;
         }
@@ -570,14 +629,18 @@ void Core::Game::check() {
 
     if (f) {
         std::cout << "Success" << std::endl;
-        Core::logMessage("Success! The output is same as needed.", 
-                         Core::LogLocation::kCore,
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Success! The output is same as needed.", 
+            Core::LogLocation::kCore,
+            Core::LogType::kInfo
+        );
     } else {
         std::cout << "Fail" << std::endl;
-        Core::logMessage("Fail! The output is not same as needed.", 
-                         Core::LogLocation::kCore, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "Fail! The output is not same as needed.", 
+            Core::LogLocation::kCore, 
+            Core::LogType::kInfo
+        );
     }
 }
 

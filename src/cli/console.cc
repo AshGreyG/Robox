@@ -18,7 +18,8 @@ unsigned int Cli::GamePanel::kCurrentCommandRow = 1;
  */
 std::wstring Cli::GamePanel::getInputLevel() {
     std::string input_str = "";     // This is the std::string version of input string, to show in the logging file
-    wchar_t* input_str_wchar = (wchar_t*)calloc(std::to_string(kCurrentLevel).length(), sizeof(wchar_t));
+    wchar_t* input_str_wchar 
+        = (wchar_t*)calloc(std::to_string(kCurrentLevel).length(), sizeof(wchar_t));
     wchar_t input_character;
     unsigned int current_command_column = 1;
     
@@ -29,8 +30,13 @@ std::wstring Cli::GamePanel::getInputLevel() {
     // show at the first time, otherwise when player enters the select panel,
     // there is no info to notice them.
 
-    while ((input_character = mvwgetch(command_window_, kCurrentCommandRow, current_command_column)) != '\n' ) {
-            
+    while ((input_character = mvwgetch(
+                command_window_, 
+                kCurrentCommandRow, 
+                current_command_column
+            )) != '\n' 
+        ) {
+
         // When player enters the 'ENTER' key, the input ends
         // and when player enters more than the string length of current level, it should notice player
 
@@ -45,31 +51,38 @@ std::wstring Cli::GamePanel::getInputLevel() {
             input_str += std::string(1, char(input_character));
             current_command_column++;
 
-            Core::logMessage("Player enters the character " +
-                             std::string(1, char(input_character)), 
-                             Core::LogLocation::kCli, 
-                             Core::LogType::kInfo);
+            Core::logMessage(
+                "Player enters the character " +
+                std::string(1, char(input_character)), 
+                Core::LogLocation::kCli, 
+                Core::LogType::kInfo
+            );
         } else {
             werase(status_window_);
             box(status_window_, 0, 0);
-            mvwaddwstr(status_window_, 1, 1, 
-                       L"Your input is over the length of max input, please press the 'ENTER' key.");
+            mvwaddwstr(
+                status_window_, 1, 1, 
+                L"Your input is over the length of max input, please press the 'ENTER' key."
+            );
             wrefresh(status_window_);
 
-            Core::logMessage("Player has already entered the string which has same length with the current level, "
-                             "we need to inform them to enter the 'ENTER' key",
-                             Core::LogLocation::kCli, 
-                             Core::LogType::kInfo);
+            Core::logMessage(
+                "Player has already entered the string which has same length with the current level, "
+                "we need to inform them to enter the 'ENTER' key",
+                Core::LogLocation::kCli, 
+                Core::LogType::kInfo
+            );
         }
     }
 
     std::wstring input_wstr(input_str_wchar);
 
-    Core::logMessage("Input string is " + 
-                     input_str + 
-                     " (notice that the logging string is std::string, but the input is std::wstring).", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "Input string is " + input_str + 
+        " (notice that the logging string is std::string, but the input is std::wstring).", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     return input_wstr;
 }
@@ -85,45 +98,55 @@ void Cli::GamePanel::initScreen() {
     noecho();
     cbreak();
 
-    target_window_ = newwin(kGameTargetWindowHeight,
-                            kGameTargetWindowWidth,
-                            0,
-                            0);
+    target_window_ = newwin(
+        kGameTargetWindowHeight,
+        kGameTargetWindowWidth,
+        0, 0
+    );
 
     box(target_window_, 0, 0);
 
-    main_window_ = newwin(kGameMainWindowHeight, 
-                          kGameMainWindowWidth, 
-                          kGameTargetWindowHeight, 
-                          0);
+    main_window_ = newwin(
+        kGameMainWindowHeight, 
+        kGameMainWindowWidth, 
+        kGameTargetWindowHeight, 0
+    );
 
     box(main_window_, 0, 0);
 
-    Core::logMessage("The game MainWindow panel has been initialized.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The game MainWindow panel has been initialized.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
-    command_window_ = newwin(kGameCommandWindowHeight,
-                             kGameCommandWindowWidth,
-                             0,
-                             kGameMainWindowWidth + 1);
+    command_window_ = newwin(
+        kGameCommandWindowHeight,
+        kGameCommandWindowWidth,
+        0, kGameMainWindowWidth + 1
+    );
 
     box(command_window_, 0, 0);
 
-    Core::logMessage("The game CommandWindow panel has been initialized.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The game CommandWindow panel has been initialized.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
-    status_window_ = newwin(kGameStatusWindowHeight,
-                            kGameStatusWindowWidth,
-                            kGameTargetWindowHeight + kGameMainWindowHeight,
-                            0);
+    status_window_ = newwin(
+        kGameStatusWindowHeight,
+        kGameStatusWindowWidth,
+        kGameTargetWindowHeight + kGameMainWindowHeight, 0
+    );
 
     box(status_window_, 0, 0);
 
-    Core::logMessage("The game StatusWindow panel has been initialized.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The game StatusWindow panel has been initialized.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     int topleft_x = (kGameMainWindowWidth - kGameMainTitleWidth) / 2;
     int topleft_y = (kGameMainWindowHeight - (kGameMainTitleHeight + kGameInfoHeight + 1)) / 2;
@@ -132,22 +155,36 @@ void Cli::GamePanel::initScreen() {
     // gametitle_topleft_y : The y coordinates of topleft corner of MainTitle and GameInfo
 
     for (int i = topleft_y; i <= topleft_y + kGameMainTitleHeight - 1; ++i) {
-        mvwaddwstr(main_window_, i, topleft_x, kGameMainTitle[i - topleft_y]);
+        mvwaddwstr(
+            main_window_, 
+            i, topleft_x, 
+            kGameMainTitle[i - topleft_y]
+        );
     }
 
-    Core::logMessage("The game title has been initialized.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The game title has been initialized.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     // notice between game title and game info there is an empty line
 
-    for (int i = topleft_y + kGameMainTitleHeight + 1; i <= topleft_y + kGameMainTitleHeight + kGameInfoHeight; ++i) {
-        mvwaddwstr(main_window_, i, topleft_x, kGameInfo[i - topleft_y - kGameMainTitleHeight - 1]);
+    for (int i = topleft_y + kGameMainTitleHeight + 1; 
+         i <= topleft_y + kGameMainTitleHeight + kGameInfoHeight; ++i
+        ) {
+        mvwaddwstr(
+            main_window_, 
+            i, topleft_x, 
+            kGameInfo[i - topleft_y - kGameMainTitleHeight - 1]
+        );
     }
 
-    Core::logMessage("The game info has been initialized.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The game info has been initialized.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     wrefresh(target_window_);
     wrefresh(main_window_);
@@ -160,16 +197,19 @@ void Cli::GamePanel::initScreen() {
  * @description: This function is to show the select level panel
  */
 void Cli::GamePanel::showSelect() {
-    Core::logMessage("showSelect function clears the MainWindow content.", 
-                     Core::LogLocation::kCli,
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "showSelect function clears the MainWindow content.", 
+        Core::LogLocation::kCli,
+        Core::LogType::kInfo
+    );
 
     werase(main_window_);
     box(main_window_, 0, 0);
  
-    unsigned int width = kTotalLevel > kMaxLevelOneLine
-                       ? kMaxLevelOneLine * kGameSelectLevelWidth + kMaxLevelOneLine - 1
-                       : kTotalLevel * kGameSelectLevelWidth + kTotalLevel - 1;
+    unsigned int width 
+        = kTotalLevel > kMaxLevelOneLine
+        ? kMaxLevelOneLine * kGameSelectLevelWidth + kMaxLevelOneLine - 1
+        : kTotalLevel * kGameSelectLevelWidth + kTotalLevel - 1;
 
     // if kTotalLevel > kMaxLevelOneLine, then there will be over two lines of levels
     // the width of select panel is 
@@ -180,7 +220,9 @@ void Cli::GamePanel::showSelect() {
     //
     // but if kTotalLevel <= kMaxLevel, then there will be only one line of level
 
-    unsigned int height = (kTotalLevel / kMaxLevelOneLine + 1) * kGameSelectLevelHeight + kTotalLevel / kMaxLevelOneLine;
+    unsigned int height 
+        = (kTotalLevel / kMaxLevelOneLine + 1) * kGameSelectLevelHeight 
+        + kTotalLevel / kMaxLevelOneLine;
 
     // the height of select panel is
     //
@@ -197,49 +239,61 @@ void Cli::GamePanel::showSelect() {
 
     // calculate the topleft corner coordinate of select level panel
 
-    Core::logMessage("The width and height of select panel have been initialized, "
-                     "width = " + std::to_string(width) + ", "
-                     "height = " + std::to_string(height), 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The width and height of select panel have been initialized, "
+        "width = " + std::to_string(width) + ", "
+        "height = " + std::to_string(height), 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     // draw the select panel
 
     for (int i = 1; i <= kTotalLevel; ++i) {
-        unsigned int current_top_left_x = topleft_x + ((i - 1) % kMaxLevelOneLine) * (kGameSelectLevelWidth + 1);
-        unsigned int current_top_left_y = topleft_y + ((i - 1) / kMaxLevelOneLine) * (kGameSelectLevelHeight + 1);
+        unsigned int current_top_left_x 
+            = topleft_x + ((i - 1) % kMaxLevelOneLine) * (kGameSelectLevelWidth + 1);
+
+        unsigned int current_top_left_y 
+            = topleft_y + ((i - 1) / kMaxLevelOneLine) * (kGameSelectLevelHeight + 1);
 
         // calculate the topleft corner coordinate of currently drawing level
 
         for (int j = 1; j <= kGameSelectLevelHeight; ++j) {
-        mvwaddwstr(main_window_, 
-                   current_top_left_y + j - 1, 
-                   current_top_left_x,
-                   kGameSelectLevel[j - 1]);
+            mvwaddwstr(
+                main_window_, 
+                current_top_left_y + j - 1, 
+                current_top_left_x,
+                kGameSelectLevel[j - 1]
+            );
         }
 
         wchar_t is_level_completed = (i <= kCurrentLevel) ? kCompleted : kUncompleted; 
 
         // if the level drawing now player has completed, then use '@' to wrap it, if not, use 'X'
 
-        std::wstring level_str = std::wstring(1, is_level_completed)
-                               + L" "
-                               + std::to_wstring(i)
-                               + L" "
-                               + std::wstring(1, is_level_completed);
+        std::wstring level_str 
+            = std::wstring(1, is_level_completed)
+            + L" "
+            + std::to_wstring(i)
+            + L" "
+            + std::wstring(1, is_level_completed);
 
         wchar_t* level_wchar = level_str.data();
 
-        mvwaddwstr(main_window_,
-                   current_top_left_y + 1,
-                   current_top_left_x + kGameSelectLevelWidth / 2 - level_str.length() / 2,
-                   level_wchar);
+        mvwaddwstr(
+            main_window_,
+            current_top_left_y + 1,
+            current_top_left_x + kGameSelectLevelWidth / 2 - level_str.length() / 2,
+            level_wchar
+        );
 
-        Core::logMessage("level panel " + std::to_string(i) + 
-                         " has been drawn successfully, it's " +
-                         ((is_level_completed == kCompleted) ? "completed" : "uncompleted") + ".", 
-                         Core::LogLocation::kCli, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "level panel " + std::to_string(i) + 
+            "has been drawn successfully, it's " +
+            ((is_level_completed == kCompleted) ? "completed" : "uncompleted") + ".", 
+            Core::LogLocation::kCli, 
+            Core::LogType::kInfo
+        );
     }
     wrefresh(main_window_);
 
@@ -251,30 +305,36 @@ void Cli::GamePanel::showSelect() {
 
         if (input_level_str >= std::to_wstring(kTotalLevel)) {
             wchar_t error_template_1[] = L"There is no level ";
-            wchar_t* error_1 = (wchar_t*)calloc(input_level_str.length() + sizeof(error_template_1) / sizeof(wchar_t) + 3, 
-                                                sizeof(wchar_t));
+            wchar_t* error_1 
+                = (wchar_t*)calloc(input_level_str.length() 
+                + sizeof(error_template_1) / sizeof(wchar_t) + 3, sizeof(wchar_t));
             std::wcscpy(error_1, error_template_1);
             std::wcscat(error_1, input_level_str.data());
             mvwaddwstr(status_window_, 1, 1, error_1);
 
             // use the C-style function to adjust to the ncurses function...
 
-            Core::logMessage("Player's input is greater than the total level.", 
-                             Core::LogLocation::kCli, 
-                             Core::LogType::kInfo);
+            Core::logMessage(
+                "Player's input is greater than the total level.", 
+                Core::LogLocation::kCli, 
+                Core::LogType::kInfo
+            );
         } else {
             wchar_t error_template_2[] = L"You haven't unlocked level ";
-            wchar_t* error_2 = (wchar_t*)calloc(input_level_str.length() + sizeof(error_template_2) / sizeof(wchar_t) + 3,
-                                                sizeof(wchar_t));
+            wchar_t* error_2 
+                = (wchar_t*)calloc(input_level_str.length() 
+                + sizeof(error_template_2) / sizeof(wchar_t) + 3, sizeof(wchar_t));
             std::wcscpy(error_2, error_template_2);
             std::wcscat(error_2, input_level_str.data());
             mvwaddwstr(status_window_, 1, 1, L"You haven't unlocked level ");
 
             // use the C-style function to adjust to the ncurses function again...
 
-            Core::logMessage("Player's input is greater than the max locked level.", 
-                             Core::LogLocation::kCli, 
-                             Core::LogType::kInfo);
+            Core::logMessage(
+                "Player's input is greater than the max locked level.", 
+                Core::LogLocation::kCli, 
+                Core::LogType::kInfo
+            );
         }
 
         std::wstring input_level_str = getInputLevel();
@@ -297,9 +357,11 @@ void Cli::GamePanel::showMain() {
  * @description: This function is to show the pause tab.
  */
 void Cli::GamePanel::showPaused() {
-    Core::logMessage("showPaused function clears the MainWindow content.", 
-                     Core::LogLocation::kCli,
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "showPaused function clears the MainWindow content.", 
+        Core::LogLocation::kCli,
+        Core::LogType::kInfo
+    );
 
     werase(main_window_);
     box(main_window_, 0, 0);
@@ -311,14 +373,20 @@ void Cli::GamePanel::showPaused() {
     // gametitle_topleft_y : The y coordinates of topleft corner of PausedTitle
     
     for (int i = topleft_y; i <= topleft_y + kGamePausedTitleHeight - 1; ++i) {
-        mvwaddwstr(main_window_, i, topleft_x, kGamePausedTitle[i - topleft_y]);
+        mvwaddwstr(
+            main_window_, 
+            i, topleft_x, 
+            kGamePausedTitle[i - topleft_y]
+        );
     }
 
     wrefresh(main_window_);
 
-    Core::logMessage("The paused title has been initialized", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "The paused title has been initialized", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 }
 
 void Cli::GamePanel::run() {
@@ -327,14 +395,18 @@ void Cli::GamePanel::run() {
 
     if (current_config_file.is_open()) {
         current_config_file >> kCurrentLevel;
-        Core::logMessage("File config/current.config has been loaded successfully. "
-                         "And the current level is " + std::to_string(kCurrentLevel), 
-                         Core::LogLocation::kCli, 
-                         Core::LogType::kInfo);
+        Core::logMessage(
+            "File config/current.config has been loaded successfully. "
+            "And the current level is " + std::to_string(kCurrentLevel), 
+            Core::LogLocation::kCli, 
+            Core::LogType::kInfo
+        );
     } else {
-        Core::logMessage("Fail to load file config/current.config", 
-                         Core::LogLocation::kCli, 
-                         Core::LogType::kError);
+        Core::logMessage(
+            "Fail to load file config/current.config", 
+            Core::LogLocation::kCli, 
+            Core::LogType::kError
+        );
     }
 
     initScreen();
@@ -364,9 +436,11 @@ void Cli::GamePanel::run() {
         }
     }
 
-    Core::logMessage("Player press q to quit.", 
-                     Core::LogLocation::kCli, 
-                     Core::LogType::kInfo);
+    Core::logMessage(
+        "Player press q to quit.", 
+        Core::LogLocation::kCli, 
+        Core::LogType::kInfo
+    );
 
     endwin();
 }
